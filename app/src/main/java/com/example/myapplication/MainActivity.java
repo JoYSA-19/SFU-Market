@@ -54,16 +54,23 @@ public class MainActivity extends AppCompatActivity {
 
         builder.setView(view).show();
 
+        //assigning text fields and buttons to a variable
         Button postBtn = view.findViewById(R.id.btnPost);
-        EditText itemName = view.findViewById(R.id.textName);
-        EditText itemDescription = view.findViewById(R.id.textDescription);
-        EditText textContact = view.findViewById(R.id.textContact);
+        String itemName = view.findViewById(R.id.textName).toString();
+        String itemDescription = view.findViewById(R.id.textDescription).toString();
+        String textContact = view.findViewById(R.id.textContact).toString();
+        PostInformation userInfo = new PostInformation();
+        userInfo.name = itemName;
+        userInfo.description = itemDescription;
+        userInfo.contact = textContact;
 
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
 
-                Call<Void> call = retrofitInterface.executePost(itemName, itemDescription, textContact);
+                System.out.println("yes");
+
+                Call<Void> call = retrofitInterface.executePost(userInfo);
 
                 call.enqueue(new Callback<Void>() {
                     @Override
