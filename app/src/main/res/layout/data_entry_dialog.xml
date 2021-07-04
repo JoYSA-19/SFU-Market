@@ -55,18 +55,11 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="122dp"
-            android:layout_height="wrap_content"
-            android:text="@android:string/cancel"
-            style="?android:attr/buttonBarButtonStyle" />
-
-        <Button
             android:id="@+id/btnPost"
-            android:layout_width="127dp"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/post"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="@string/post" />
 
     </LinearLayout>
 
