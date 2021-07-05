@@ -28,9 +28,9 @@ Testing
 
 Maintainers
 ------------------------------------
-Amanda Hagara (aharaga)
-Brendon Kim (brendonk)
-Lucas Mah (lma95)
-Trevor Pinto (tpa31)
-Jonathan Yang (sya171)
+- Amanda Hagara (aharaga)
+- Brendon Kim (brendonk)
+- Lucas Mah (lma95)
+- Trevor Pinto (tpa31)
+- Jonathan Yang (sya171)
  
