@@ -35,10 +35,6 @@ public class MainActivity extends AppCompatActivity {
 
         retrofitInterface = retrofit.create(RetrofitInterface.class);
 
-        //FloatingActionButton btnMakePost = (FloatingActionButton) findViewById(R.id.btnMakePost);
-        //if (btnMakePost == null) throw new AssertionError();
-        //btnMakePost.setOnClickListener(view -> showDialog());
-
         findViewById(R.id.btnMakePost).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,9 +46,10 @@ public class MainActivity extends AppCompatActivity {
     private void handlePostDialog() {
         View view = getLayoutInflater().inflate(R.layout.data_entry_dialog, null);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog builder = new AlertDialog.Builder(this).create();
 
-        builder.setView(view).show();
+        builder.setView(view);
+        builder.show();
 
         //assigning text fields and buttons to a variable
         Button postBtn = view.findViewById(R.id.btnPost);
@@ -67,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                System.out.println("yes");
 
                 Call<Void> call = retrofitInterface.executePost(userInfo);
 
@@ -87,13 +82,10 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.LENGTH_LONG).show();
                     }
                 });
+
+                builder.dismiss();
+
             }
         });
     }
-/**
-    private void showDialog(){
-        PostEntryDialog dialog = new PostEntryDialog();
-        dialog.show(getSupportFragmentManager(),"DIALOG_FRAGMENT");
-    }
- */
 }

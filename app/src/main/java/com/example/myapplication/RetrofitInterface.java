@@ -12,4 +12,6 @@ public interface RetrofitInterface {
     @POST("/btnPost")
     Call<Void> executePost(@Body PostInformation userInfo);
 
+
+
 }
