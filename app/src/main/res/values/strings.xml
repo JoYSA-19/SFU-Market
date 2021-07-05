@@ -5,4 +5,7 @@
     <string name="item_name">Item Name</string>
     <string name="item_description">Item Description</string>
     <string name="make_a_post">Make a post</string>
+    <string name="takephoto" />
+    <string name="uploadphoto" />
+    <string name="uploaded_picture">Uploaded Picture</string>
 </resources>
