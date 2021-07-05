@@ -31,32 +31,17 @@
         android:inputType="textCapWords" />
 
 
-
-    <LinearLayout
+    <ImageButton
+        android:id="@+id/uploadImageButton"
         android:layout_width="300dp"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <ImageButton
-            android:id="@+id/cameraButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_menu_camera"
-            android:contentDescription="@string/takephoto" />
-
-        <ImageButton
-            android:id="@+id/uploadImageButton"
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/uploadphoto"
-            app:srcCompat="@android:drawable/stat_sys_upload" />
-    </LinearLayout>
+        android:contentDescription="@string/uploadphoto"
+        app:srcCompat="@android:drawable/stat_sys_upload" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="300dp"
         android:contentDescription="@string/uploaded_picture" />
 
     <EditText

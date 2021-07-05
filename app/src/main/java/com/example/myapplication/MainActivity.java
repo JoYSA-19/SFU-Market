@@ -3,6 +3,8 @@ package com.example.myapplication;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import retrofit2.Call;
@@ -11,13 +13,16 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private RetrofitInterface retrofitInterface;
     private String BASE_URL = "http://10.0.2.2:3000";
     private String currentPhotoPath;
+    private Uri pickedImgUri = null;
+    private static final int PReqCode = 2 ;
+    private static final int REQUESTCODE = 1 ;
+
+    Button postBtn;
+    ImageButton uploadBtn;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +79,9 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
         //assigning text fields and buttons to a variable
-        Button postBtn = view.findViewById(R.id.btnPost);
-        ImageButton cameraBtn = view.findViewById(R.id.cameraButton);
-        ImageButton uploadBtn = view.findViewById(R.id.uploadImageButton);
+        postBtn = view.findViewById(R.id.btnPost);
+        imageView = view.findViewById(R.id.imageView);
+        uploadBtn = view.findViewById(R.id.uploadImageButton);
 
         String itemName = view.findViewById(R.id.textName).toString();
         String itemDescription = view.findViewById(R.id.textDescription).toString();
@@ -105,39 +117,104 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        cameraBtn.setOnClickListener(new View.OnClickListener(){
+        uploadBtn.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View view) {
-                String fileName = "photo";
-                File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-                try {
-                    File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
-                    currentPhotoPath = imageFile.getAbsolutePath();
-
-                    Uri imageUri = FileProvider.getUriForFile(MainActivity.this,
-                            "com.example.myapplication.fileprovider",imageFile);
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
-
-                    startActivityForResult(intent, 123);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            public void onClick(View v) {
+                checkAndRequestForPermission();
             }
+
         });
     }
+    private void checkAndRequestForPermission() {
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                Toast.makeText(MainActivity.this,"Please accept for required permission",Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PReqCode);
+            }
+        }
+        else
+            // everything goes well : we have permission to access user gallery
+            openGallery();
+    }
 
+
+
+
+
+    private void openGallery() {
+
+        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        galleryIntent.setType("image/*");
+        startActivityForResult(galleryIntent,REQUESTCODE);
+    }
+
+
+
+    // when user picked an image ...
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == 1 && resultCode == RESULT_OK){
-            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+        if (resultCode == RESULT_OK && requestCode == REQUESTCODE && data != null ) {
 
-            ImageView imageView = findViewById(R.id.imageView);
-            imageView.setImageBitmap(bitmap);
+            // the user has successfully picked an image
+            // we need to save its reference to a Uri variable
+            pickedImgUri = data.getData() ;
+            imageView.setImageURI(pickedImgUri);
+
         }
+
+
     }
+//            @Override
+//            public void onClick(View view) {
+//                String fileName = "photo";
+//                File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+//
+//                try {
+//                    File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
+//                    currentPhotoPath = imageFile.getAbsolutePath();
+//
+//                    Uri imageUri = FileProvider.getUriForFile(MainActivity.this,
+//                            "com.example.myapplication.fileprovider",imageFile);
+//                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//                    intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+//
+//                    startActivityForResult(intent, REQUESTCODE);
+//
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        ImageView imageView = findViewById(R.id.imageView);
+//        Bitmap photo = null;
+//        if (data != null) {
+//            photo = (Bitmap) data.getExtras().get(currentPhotoPath);
+//        }
+//        imageView.setImageBitmap(photo);
+////        if(requestCode == 1 && resultCode == RESULT_OK && data != null){
+////            ImageView imageView = findViewById(R.id.imageView);
+////            Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+////            if(bitmap == null){
+////                BitmapFactory.Options options = new BitmapFactory.Options();
+////                options.inSampleSize = 2;
+////                bitmap = BitmapFactory.decodeFile(currentPhotoPath,options);
+////            }
+////            imageView.setImageBitmap(bitmap);
+////
+////        }
+//    }
 }
