@@ -32,6 +32,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * The home page including post button, which will open up a dialog for posting instantly
+ */
 public class MainActivity extends AppCompatActivity {
 
     private Retrofit retrofit;
@@ -39,15 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private final String BASE_URL = "http://10.0.2.2:3000";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
-    private static final int PReqCode = 2 ;
-    private static final int UPLOADCODE = 1 ;
-    private static final int CAMERACODE = 2 ;
+    private static final int UPLOAD_CODE = 1 ;
+    private static final int CAMERA_CODE = 2 ;
+    private static final int REQUEST_CODE = 3 ;
 
     Button postBtn;
     ImageButton cameraBtn,uploadBtn;
     ImageView imageView;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +70,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Shows the dialog and allows the user to enter information:
+     *  item name, item description, photo and contact information
+     */
     private void handlePostDialog() {
         View view = getLayoutInflater().inflate(R.layout.data_entry_dialog, null);
-
         AlertDialog builder = new AlertDialog.Builder(this).create();
 
         builder.setView(view);
         builder.show();
 
         //assigning text fields and buttons to a variable
-        cameraBtn = view.findViewById(R.id.cameraButton);
         postBtn = view.findViewById(R.id.btnPost);
-        imageView = view.findViewById(R.id.imageView);
+        cameraBtn = view.findViewById(R.id.cameraButton);
         uploadBtn = view.findViewById(R.id.uploadImageButton);
-
+        imageView = view.findViewById(R.id.imageView);
 
         String itemName = view.findViewById(R.id.textName).toString();
         String itemDescription = view.findViewById(R.id.textDescription).toString();
@@ -95,9 +98,7 @@ public class MainActivity extends AppCompatActivity {
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Call<Void> call = retrofitInterface.executePost(userInfo);
-
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
         cameraBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
 
-                    startActivityForResult(intent, CAMERACODE);
+                    startActivityForResult(intent, CAMERA_CODE);
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -140,58 +142,56 @@ public class MainActivity extends AppCompatActivity {
         });
 
         uploadBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 checkAndRequestForPermission();
             }
-
         });
-
     }
+
+    /**
+     * Ask permission from the user, once approved, open the gallery
+     */
     private void checkAndRequestForPermission() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 Toast.makeText(MainActivity.this,"Please accept for required permission",Toast.LENGTH_SHORT).show();
             }
-            else
-            {
+            else {
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        PReqCode);
+                        REQUEST_CODE);
             }
         }
-        else
-            // everything goes well : we have permission to access user gallery
-            openGallery();
+        else {
+            // everything goes well : we have permission to access user gallery, open the gallery
+            Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+            galleryIntent.setType("image/*");
+            startActivityForResult(galleryIntent, UPLOAD_CODE);
+        }
     }
 
-    private void openGallery() {
-
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-        startActivityForResult(galleryIntent, UPLOADCODE);
-    }
-
-    // when user picked an image ...
+    /**
+     * After user picked an image, get the image and show it in the preview
+     * @param requestCode request code
+     * @param resultCode User's choice, whether Camera or Upload
+     * @param data image data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && requestCode == UPLOADCODE && data != null ) {
-
+        if (resultCode == RESULT_OK && requestCode == UPLOAD_CODE && data != null ) {
             // the user has successfully picked an image
             // we need to save its reference to a Uri variable
             pickedImgUri = data.getData() ;
             imageView.setImageURI(pickedImgUri);
         }
-        else if(resultCode == RESULT_OK && requestCode == CAMERACODE && data != null ){
+        else if(resultCode == RESULT_OK && requestCode == CAMERA_CODE && data != null ){
             Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
             imageView.setImageBitmap(bitmap);
         }
-
-
     }
 
 }
