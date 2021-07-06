@@ -126,10 +126,10 @@ public class MainActivity extends AppCompatActivity {
                     File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
                     currentPhotoPath = imageFile.getAbsolutePath();
 
-                    Uri imageUri = FileProvider.getUriForFile(MainActivity.this,
+                    pickedImgUri = FileProvider.getUriForFile(MainActivity.this,
                             "com.example.myapplication.fileprovider",imageFile);
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
 
                     startActivityForResult(intent, CAMERACODE);
 
