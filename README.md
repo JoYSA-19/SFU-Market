@@ -1,5 +1,9 @@
 SFU Market
 
+Preface
+------------------------------------
+All of us are completely new to every tool we are using this far, so we have been performing numerous spikes to catch up in knowledge about what tools we are using and from there, determine how much time we need to do such tasks. As a result of that, we have run into some trouble with the current database solution, MongoDB, and will be changing to mySQL for various reasons including easier access to documentation, better suits our needs, and ability to connect to an apache web server via Xampp for testing. This has created technical debt for us. Because of this, we have not been using the merging or issues feature on the SFU git lab and will begin utilizing these features for the following sprints.
+
 Introduction
 ------------------------------------
 The SFU Market application allows for students to easily search for classes and the textbooks they require, removing the need for second-hand marketplaces such as the Facebook Marketplace and Craigslist. The program is intended for users trying to save money and reduce waste by selling old textbooks instead of throwing them out. The users would either be sellers or buyers: sellers would post their products, along with the relevant information (photos, class, ISBN), while buyers would search and buy the product they require...
