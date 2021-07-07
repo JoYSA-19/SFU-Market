@@ -2,7 +2,7 @@ SFU Market
 
 Preface
 ------------------------------------
-All of us are completely new to every tool we are using this far, so we have been performing numerous spikes to catch up in knowledge about what tools we are using and from there, determine how much time we need to do such tasks. As a result of that, we have run into some trouble with the current database solution, MongoDB, and will be changing to mySQL for various reasons. This includes: easier access to documentation, better suits our needs, and ability to connect to an apache web server via Xampp for testing. This has created technical debt for us. Because of this, we have not been using the merging or issues feature on the SFU git lab and will begin utilizing these features for the following sprints.
+All of us are completely new to every tool we are using this far, so we have been performing numerous spikes to catch up in knowledge about what tools we are using and from there, determine how much time we need to do such tasks. As a result of that, we have run into some trouble with the current database solution, MongoDB with NodeJS, and will be changing to mySQL with PHP for various reasons. This includes: easier access to documentation, better suits our needs, and ability to connect to an apache web server via Xampp for testing. This has created technical debt for us. Another result of this is that we have not been using the merging or issues feature on the SFU git lab and will begin utilizing these features for the following sprints.
 
 Introduction
 ------------------------------------
