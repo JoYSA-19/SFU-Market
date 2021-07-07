@@ -18,4 +18,5 @@ public class PostInformation {
     public String name;
     public String description;
     public String contact;
+    public int price;
 }

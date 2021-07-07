@@ -90,10 +90,12 @@ public class MainActivity extends AppCompatActivity {
         String itemName = view.findViewById(R.id.textName).toString();
         String itemDescription = view.findViewById(R.id.textDescription).toString();
         String textContact = view.findViewById(R.id.textContact).toString();
+        int intPrice = view.fiewViewById(R.id.);
         PostInformation userInfo = new PostInformation();
         userInfo.name = itemName;
         userInfo.description = itemDescription;
         userInfo.contact = textContact;
+        userInfo.price = intPrice;
 
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override

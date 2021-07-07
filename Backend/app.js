@@ -21,7 +21,8 @@ mongoClient.connect(url, (err, db) => {
             const newPost = {
                 name: req.body.name,
                 description: req.body.description,
-                contact: req.body.contact
+                contact: req.body.contact,
+                price: req.body.price
             }
 
             collection.insertOne(newPost, (err, result) => {
