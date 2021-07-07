@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="post">post</string>
+    <string name="contact_info_ex_phone_facebook">Contact Info: Ex. Phone #, Facebook</string>
+    <string name="item_name">Item Name</string>
+    <string name="item_description">Item Description</string>
+    <string name="make_a_post">Make a post</string>
+    <string name="take_a_photo" />
+    <string name="upload_a_photo" />
+    <string name="uploaded_picture">Uploaded Picture</string>
 </resources>
