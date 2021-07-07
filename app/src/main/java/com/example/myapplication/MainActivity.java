@@ -90,12 +90,18 @@ public class MainActivity extends AppCompatActivity {
         String itemName = view.findViewById(R.id.textName).toString();
         String itemDescription = view.findViewById(R.id.textDescription).toString();
         String textContact = view.findViewById(R.id.textContact).toString();
-        int intPrice = view.fiewViewById(R.id.);
+        float itemPrice = 0;
+        try {
+            itemPrice = Float.parseFloat(view.findViewById(R.id.itemPrice).toString());
+        }catch (NumberFormatException e){
+            e.printStackTrace();
+        }
+
         PostInformation userInfo = new PostInformation();
         userInfo.name = itemName;
         userInfo.description = itemDescription;
         userInfo.contact = textContact;
-        userInfo.price = intPrice;
+        userInfo.price = itemPrice;
 
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override

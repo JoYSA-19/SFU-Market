@@ -8,4 +8,5 @@
     <string name="take_a_photo" />
     <string name="upload_a_photo" />
     <string name="uploaded_picture">Uploaded Picture</string>
+    <string name="suggested_price">Suggested Price</string>
 </resources>

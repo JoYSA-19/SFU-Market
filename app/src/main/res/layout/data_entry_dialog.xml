@@ -41,6 +41,15 @@
                 android:inputType="textCapWords"
                 android:importantForAutofill="no"/>
 
+            <EditText
+                android:id="@+id/itemPrice"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/suggested_price"
+                android:inputType="number|numberDecimal"
+                android:importantForAutofill="no"/>
+
             <LinearLayout
                 android:layout_width="300dp"
                 android:layout_height="match_parent"
