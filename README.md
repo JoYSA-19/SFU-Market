@@ -28,6 +28,7 @@ Testing
 - When testing the front-end and back-end communication: On the Terminal, locate the directory where the file "app.js" is, 
         run the command [node app.js] and the server would run, showing the message : "Listening on Port 3000..."
         Then run the app on the device. 
+(currently, the image uploaded does not properly store, one of the reasons for the change to mySQL)
 
 
 Maintainers
