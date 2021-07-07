@@ -20,7 +20,7 @@ Installation
 
 Testing
 ------------------------------------
-- Have a valid **emunator** running or test on **your own android device**
+- Have a valid **emulator** running or test on **your own android device**
 - When testing the front-end and back-end communication: On the Terminal, locate the directory where the file "app.js" is, 
         run the command [node app.js] and the server would run, showing the message : "Listening on Port 3000..."
         Then run the app on the device. 
