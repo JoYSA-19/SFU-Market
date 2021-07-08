@@ -87,12 +87,12 @@ public class MainActivity extends AppCompatActivity {
         uploadBtn = view.findViewById(R.id.uploadImageButton);
         imageView = view.findViewById(R.id.imageView);
 
-        String itemName = view.findViewById(R.id.textName).toString();
-        String itemDescription = view.findViewById(R.id.textDescription).toString();
+        String itemName = view.findViewById(R.id.inputName).toString();
+        String itemDescription = view.findViewById(R.id.inputDescription).toString();
         String textContact = view.findViewById(R.id.textContact).toString();
         float itemPrice = 0;
         try {
-            itemPrice = Float.parseFloat(view.findViewById(R.id.itemPrice).toString());
+            itemPrice = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
         }catch (NumberFormatException e){
             e.printStackTrace();
         }
