@@ -60,6 +60,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn(String email, String password) {
+        Intent mainActivity = new Intent(getApplicationContext(),MainActivity.class);
+        startActivity(mainActivity);
+        finish();
         //TODO Sign in process
     }
 
