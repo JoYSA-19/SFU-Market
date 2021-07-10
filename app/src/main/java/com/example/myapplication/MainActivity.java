@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Retrofit retrofit;
     private RetrofitInterface retrofitInterface;
-    private final String BASE_URL = "http://10.0.2.2:3000";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
     private static final int UPLOAD_CODE = 1 ;
@@ -87,21 +86,17 @@ public class MainActivity extends AppCompatActivity {
         uploadBtn = view.findViewById(R.id.uploadImageButton);
         imageView = view.findViewById(R.id.imageView);
 
-        String itemName = view.findViewById(R.id.inputName).toString();
-        String itemDescription = view.findViewById(R.id.inputDescription).toString();
-        String textContact = view.findViewById(R.id.textContact).toString();
-        float itemPrice = 0;
+        String textbook_name = view.findViewById(R.id.inputName).toString();
+        String description_text = view.findViewById(R.id.inputDescription).toString();
+        String user_id = view.findViewById(R.id.userId).toString();
+        float item_price = 0;
         try {
-            itemPrice = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
+            item_price = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
         }catch (NumberFormatException e){
             e.printStackTrace();
         }
 
-        PostInformation userInfo = new PostInformation();
-        userInfo.name = itemName;
-        userInfo.description = itemDescription;
-        userInfo.contact = textContact;
-        userInfo.price = itemPrice;
+        PostInformation userInfo = new PostInformation(textbook_name, description_text, user_id, item_price);
 
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override

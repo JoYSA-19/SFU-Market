@@ -15,8 +15,27 @@ import androidx.fragment.app.DialogFragment;
  * and user's contact information
  */
 public class PostInformation {
-    public String name;
-    public String description;
-    public String contact;
-    public float price;
+    private String textbook_name;
+    private String description;
+    private String contact;
+    private float price;
+
+    public PostInformation(String textbook_name, String description, String contact, float price) {
+        this.textbook_name = textbook_name;
+        this.description = description;
+        this.contact = contact;
+        this.price = price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public float getPrice() {
+        return price;
+    }
+
+    public String getContact() {
+        return contact;
+    }
 }
