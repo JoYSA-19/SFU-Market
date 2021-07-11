@@ -6,11 +6,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import android.Manifest;
 import android.content.Intent;
@@ -21,13 +23,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,13 +42,15 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private Retrofit retrofit;
-    private RetrofitInterface retrofitInterface;
     private String currentPhotoPath;
+    private String BASE_URL = null;
     private Uri pickedImgUri = null;
+    private String URL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
     private static final int UPLOAD_CODE = 1 ;
     private static final int CAMERA_CODE = 2 ;
     private static final int REQUEST_CODE = 3 ;
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     Button postBtn;
     ImageButton cameraBtn,uploadBtn;
@@ -53,13 +60,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        retrofitInterface = retrofit.create(RetrofitInterface.class);
 
         findViewById(R.id.btnMakePost).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,38 +86,55 @@ public class MainActivity extends AppCompatActivity {
         uploadBtn = view.findViewById(R.id.uploadImageButton);
         imageView = view.findViewById(R.id.imageView);
 
-        String textbook_name = view.findViewById(R.id.inputName).toString();
-        String description_text = view.findViewById(R.id.inputDescription).toString();
-        String user_id = view.findViewById(R.id.userId).toString();
-        float item_price = 0;
-        try {
-            item_price = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
-        }catch (NumberFormatException e){
-            e.printStackTrace();
-        }
-
-        PostInformation userInfo = new PostInformation(textbook_name, description_text, user_id, item_price);
-
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Call<Void> call = retrofitInterface.executePost(userInfo);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
-                        if (response.code() == 200) {
-                            Toast.makeText(MainActivity.this,
-                                    "Post Created Successfully", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    @Override
-                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
-                        Toast.makeText(MainActivity.this, t.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-                builder.dismiss();
+                EditText nameText = view.findViewById(R.id.inputName);
+                EditText descriptionText = view.findViewById(R.id.inputDescription);
+                EditText priceText = view.findViewById(R.id.inputPrice);
+                EditText idText = view.findViewById(R.id.userId);
 
+                String textbook_name = nameText.getText().toString();
+                String description_text = descriptionText.getText().toString();
+                String stringUserId = idText.getText().toString();
+                String stringItemPrice = priceText.getText().toString();
+                int user_id = 0;
+                try {
+                    user_id = Integer.parseInt(stringUserId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                double item_price = 0;
+                try {
+                    item_price = Double.parseDouble(stringItemPrice);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                double finalItem_price = item_price;
+
+                int finalUser_id = user_id;
+
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("user_id", user_id);
+                    json.put("textbook_name", textbook_name);
+                    json.put("suggested_price", finalItem_price);
+                    json.put("photo_filepath", "../../photos/gasps.png");
+                    json.put("description_text", description_text);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        doPostRequest(URL, String.valueOf(json));
+                    }
+                }).start();
+
+                builder.dismiss();
             }
         });
 
@@ -148,6 +165,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 checkAndRequestForPermission();
+            }
+        });
+    }
+
+    void doPostRequest(String url, String json) {
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String mMessage = response.body().string();
+                Log.e("success", mMessage);
             }
         });
     }
