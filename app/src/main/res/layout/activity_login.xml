@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:autofillHints="@string/user_email"
         android:ems="10"
-        android:hint="@string/user_email"
+        android:hint="@string/sfu_computing_id"
         android:inputType="textEmailAddress"
         app:layout_constraintBottom_toTopOf="@+id/inputPassword"
         app:layout_constraintEnd_toEndOf="parent"
@@ -53,18 +53,6 @@
         tools:ignore="UseSwitchCompatOrMaterialXml" />
 
     <Button
-        android:id="@+id/signUpButton"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:padding="4dp"
-        android:text="@string/sign_up"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginButton" />
-
-    <Button
         android:id="@+id/loginButton"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="100dp"
@@ -74,15 +62,23 @@
         android:text="@string/login"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+        app:layout_constraintTop_toTopOf="@+id/guideline3"
+        app:layout_constraintVertical_bias="0.217" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline3"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/signUpButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.5" />
+        android:layout_weight="1"
+        android:padding="4dp"
+        android:text="@string/sign_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginButton" />
 
     <ProgressBar
         android:id="@+id/loginProgressBar"
@@ -91,7 +87,16 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline3" />
+        app:layout_constraintTop_toTopOf="@+id/guideline3"
+        app:layout_constraintVertical_bias="0.217" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="366dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
