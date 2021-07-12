@@ -6,12 +6,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,8 +31,6 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private Retrofit retrofit;
-    private RetrofitInterface retrofitInterface;
     private final String BASE_URL = "http://10.0.2.2:3000";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
@@ -54,13 +46,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        retrofitInterface = retrofit.create(RetrofitInterface.class);
 
         findViewById(R.id.btnMakePost).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         String itemName = view.findViewById(R.id.inputName).toString();
         String itemDescription = view.findViewById(R.id.inputDescription).toString();
-        String textContact = view.findViewById(R.id.textContact).toString();
+        String textContact = view.findViewById(R.id.userId).toString();
         float itemPrice = 0;
         try {
             itemPrice = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
@@ -97,30 +82,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        PostInformation userInfo = new PostInformation();
-        userInfo.name = itemName;
-        userInfo.description = itemDescription;
-        userInfo.contact = textContact;
-        userInfo.price = itemPrice;
-
         postBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Call<Void> call = retrofitInterface.executePost(userInfo);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
-                        if (response.code() == 200) {
-                            Toast.makeText(MainActivity.this,
-                                    "Post Created Successfully", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    @Override
-                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
-                        Toast.makeText(MainActivity.this, t.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
+
                 builder.dismiss();
 
             }
