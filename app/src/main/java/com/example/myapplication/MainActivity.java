@@ -23,7 +23,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -47,11 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_CODE = 2 ;
     private static final int REQUEST_CODE = 3 ;
 
-    private EditText nameInput, descriptionInput, contactInput, priceInput;
-    private ImageView imageView;
-
-    private PostInformation userInfo;
-
+    Button postBtn;
+    ImageButton cameraBtn,uploadBtn;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +62,12 @@ public class MainActivity extends AppCompatActivity {
 
         retrofitInterface = retrofit.create(RetrofitInterface.class);
 
-        findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
+        findViewById(R.id.btnMakePost).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handlePostDialog();
+            }
+        });
     }
 
     /**
@@ -80,105 +82,79 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
         //assigning text fields and buttons to a variable
-        Button postBtn = view.findViewById(R.id.btnPost);
-        ImageButton cameraBtn = view.findViewById(R.id.cameraButton);
-        ImageButton uploadBtn = view.findViewById(R.id.uploadImageButton);
+        postBtn = view.findViewById(R.id.btnPost);
+        cameraBtn = view.findViewById(R.id.cameraButton);
+        uploadBtn = view.findViewById(R.id.uploadImageButton);
         imageView = view.findViewById(R.id.imageView);
-        nameInput = view.findViewById(R.id.inputName);
-        descriptionInput = view.findViewById(R.id.inputDescription);
-        contactInput = view.findViewById(R.id.textContact);
-        priceInput = view.findViewById(R.id.inputPrice);
 
-        userInfo = new PostInformation();
-
-        postBtn.setOnClickListener(v -> makePost(builder));
-        cameraBtn.setOnClickListener(view1 -> takePhoto());
-        uploadBtn.setOnClickListener(v -> checkAndRequestForPermission());
-    }
-
-
-    /**
-     * The method makePost will make a post by getting user input and send to the back-end
-     * @param builder AlertDialog
-     */
-    private void makePost(AlertDialog builder) {
-        String itemPrice; // empty value
-        String itemName;
-        String itemDescription;
-        String contactInfo;
-        itemName = nameInput.getText().toString();
-        itemDescription = descriptionInput.getText().toString();
-        contactInfo = contactInput.getText().toString();
-        itemPrice = priceInput.getText().toString();
-        if(!checkPostValidity(itemName,itemDescription,contactInfo,itemPrice))
-            return;
-        // Only for Testing
-        System.out.println("Name: " + itemName);
-        System.out.println("Des: " + itemDescription);
-        System.out.println("contact: " + contactInfo);
-        System.out.println("price: " + itemPrice);
-
-        if(pickedImgUri == null){
-            showMessage("All fields are required: Please include a photo");
-            return;
-        }
-        System.out.println(pickedImgUri.toString());
-
-        userInfo.price = Float.parseFloat(itemPrice);
-        // Don't have to catch NumberFormatException because the EditText is already specified as "input float"
-        if(userInfo.price < 0){
-            showMessage("Negative value: Please enter a valid value");
-            return;
-        }
-        userInfo.name = itemName;
-        userInfo.description = itemDescription;
-        userInfo.contact = contactInfo;
-        userInfo.imageUri = pickedImgUri;
-
-        // Pass values to back-end
-        Call<Void> call = retrofitInterface.executePost(userInfo);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
-                if (response.code() == 200) {
-                    Toast.makeText(MainActivity.this,
-                            "Post Created Successfully", Toast.LENGTH_LONG).show();
-                    builder.dismiss();
-                }
-            }
-
-            @Override
-            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
-                Toast.makeText(MainActivity.this, t.getMessage(),
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-        builder.dismiss(); //Please comment this line if testing on back-end
-
-    }
-
-    /**
-     * This function will take the user to the camera and take a photo of their item.
-     * With permission given.
-     */
-    private void takePhoto() {
-        String fileName = "photo";
-        File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
+        String itemName = view.findViewById(R.id.inputName).toString();
+        String itemDescription = view.findViewById(R.id.inputDescription).toString();
+        String textContact = view.findViewById(R.id.textContact).toString();
+        float itemPrice = 0;
         try {
-            File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
-            currentPhotoPath = imageFile.getAbsolutePath();
-
-            pickedImgUri = FileProvider.getUriForFile(MainActivity.this,
-                    "com.example.myapplication.fileprovider",imageFile);
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
-
-            startActivityForResult(intent, CAMERA_CODE);
-
-        } catch (IOException e) {
+            itemPrice = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
+        }catch (NumberFormatException e){
             e.printStackTrace();
         }
+
+        PostInformation userInfo = new PostInformation();
+        userInfo.name = itemName;
+        userInfo.description = itemDescription;
+        userInfo.contact = textContact;
+        userInfo.price = itemPrice;
+
+        postBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Call<Void> call = retrofitInterface.executePost(userInfo);
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                        if (response.code() == 200) {
+                            Toast.makeText(MainActivity.this,
+                                    "Post Created Successfully", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    @Override
+                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                        Toast.makeText(MainActivity.this, t.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    }
+                });
+                builder.dismiss();
+
+            }
+        });
+
+        cameraBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                String fileName = "photo";
+                File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+                try {
+                    File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
+                    currentPhotoPath = imageFile.getAbsolutePath();
+
+                    pickedImgUri = FileProvider.getUriForFile(MainActivity.this,
+                            "com.example.myapplication.fileprovider",imageFile);
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
+
+                    startActivityForResult(intent, CAMERA_CODE);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        uploadBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAndRequestForPermission();
+            }
+        });
     }
 
     /**
@@ -188,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                showMessage("Please accept for required permission");
+                Toast.makeText(MainActivity.this,"Please accept for required permission",Toast.LENGTH_SHORT).show();
             }
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
@@ -224,38 +200,6 @@ public class MainActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
             imageView.setImageBitmap(bitmap);
         }
-
-    }
-
-    /**
-     * Check if the input values are empty.
-     * @param itemName item name
-     * @param itemDescription item description
-     * @param contactInfo contact information
-     * @param itemPrice item price
-     * @return true if all filled; false if at least one is empty
-     */
-    private boolean checkPostValidity (String itemName, String itemDescription, String contactInfo, String itemPrice){
-        boolean result = false;
-        if(itemName.isEmpty())
-            showMessage("All fields are required: Please enter the item name");
-        else if(itemDescription.isEmpty())
-            showMessage("All fields are required: Please enter the item description");
-        else if(itemPrice.isEmpty())
-            showMessage("All fields are required: Please check the price field");
-        else if(contactInfo.isEmpty())
-            showMessage("All fields are required: Please leave your contact information");
-        else
-            result = true;
-        return result;
-    }
-
-    /**
-     * Create a Toast message at the bottom of the screen
-     * @param text message
-     */
-    private void showMessage (String text){
-        Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
     }
 
 }

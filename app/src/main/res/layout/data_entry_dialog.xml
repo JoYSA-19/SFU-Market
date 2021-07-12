@@ -78,12 +78,12 @@
                 android:contentDescription="@string/uploaded_picture" />
 
             <EditText
-                android:id="@+id/textContact"
+                android:id="@+id/userId"
                 android:layout_width="300dp"
                 android:layout_height="92dp"
                 android:ems="10"
                 android:gravity="start|top"
-                android:hint="@string/contact_info_ex_phone_facebook"
+                android:hint="User ID"
                 android:inputType="textMultiLine"
                 android:autofillHints="phone number"/>
 
