@@ -6,6 +6,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,13 +23,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,28 +42,24 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private final String BASE_URL = "http://10.0.2.2:3000";
+    private String URL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
-    private static final int UPLOAD_CODE = 1 ;
-    private static final int CAMERA_CODE = 2 ;
-    private static final int REQUEST_CODE = 3 ;
+    private static final int UPLOAD_CODE = 1;
+    private static final int CAMERA_CODE = 2;
+    private static final int REQUEST_CODE = 3;
 
-    Button postBtn;
-    ImageButton cameraBtn,uploadBtn;
-    ImageView imageView;
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    private EditText nameText, descriptionText, idText, priceText;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        findViewById(R.id.btnMakePost).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                handlePostDialog();
-            }
-        });
+        findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
     }
 
     /**
@@ -67,59 +74,116 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
 
         //assigning text fields and buttons to a variable
-        postBtn = view.findViewById(R.id.btnPost);
-        cameraBtn = view.findViewById(R.id.cameraButton);
-        uploadBtn = view.findViewById(R.id.uploadImageButton);
+        Button postBtn = view.findViewById(R.id.btnPost);
+        ImageButton cameraBtn = view.findViewById(R.id.cameraButton);
+        ImageButton uploadBtn = view.findViewById(R.id.uploadImageButton);
         imageView = view.findViewById(R.id.imageView);
+        nameText = view.findViewById(R.id.inputName);
+        descriptionText = view.findViewById(R.id.inputDescription);
+        priceText = view.findViewById(R.id.inputPrice);
+        idText = view.findViewById(R.id.userId);
 
-        String itemName = view.findViewById(R.id.inputName).toString();
-        String itemDescription = view.findViewById(R.id.inputDescription).toString();
-        String textContact = view.findViewById(R.id.userId).toString();
-        float itemPrice = 0;
+        postBtn.setOnClickListener(v -> makePost(builder));
+        cameraBtn.setOnClickListener(view1 -> takePhoto());
+        uploadBtn.setOnClickListener(v -> checkAndRequestForPermission());
+    }
+
+
+    /**
+     * The method makePost will make a post by getting user input and send to the back-end
+     * @param builder AlertDialog
+     */
+    private void makePost(AlertDialog builder) {
+        String textbook_name = nameText.getText().toString();
+        String description_text = descriptionText.getText().toString();
+        String stringUserId = idText.getText().toString();
+        String stringItemPrice = priceText.getText().toString();
+        int user_id = 0;
         try {
-            itemPrice = Float.parseFloat(view.findViewById(R.id.inputPrice).toString());
-        }catch (NumberFormatException e){
+            user_id = Integer.parseInt(stringUserId);
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        postBtn.setOnClickListener(new View.OnClickListener() {
+        double item_price = 0;
+        try {
+            item_price = Double.parseDouble(stringItemPrice);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
+        double finalItem_price = item_price;
+
+        int finalUser_id = user_id;
+
+        JSONObject json = new JSONObject();
+        try {
+            json.put("user_id", user_id);
+            json.put("textbook_name", textbook_name);
+            json.put("suggested_price", finalItem_price);
+            json.put("photo_filepath", "../../photos/gasps.png");
+            json.put("description_text", description_text);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        new Thread(new Runnable() {
             @Override
-            public void onClick(View v) {
+            public void run() {
+                doPostRequest(URL, String.valueOf(json));
+            }
+        }).start();
 
-                builder.dismiss();
+        builder.dismiss();
+    }
 
+    void doPostRequest(String url, String json) {
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String mMessage = response.body().string();
+                Log.e("success", mMessage);
             }
         });
+    }
 
-        cameraBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                String fileName = "photo";
-                File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    /**
+     * This function will take the user to the camera and take a photo of their item.
+     * With permission given.
+     */
+    private void takePhoto() {
+        String fileName = "photo";
+        File storageDirectory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-                try {
-                    File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
-                    currentPhotoPath = imageFile.getAbsolutePath();
+        try {
+            File imageFile = File.createTempFile(fileName,".jpg",storageDirectory);
+            currentPhotoPath = imageFile.getAbsolutePath();
 
-                    pickedImgUri = FileProvider.getUriForFile(MainActivity.this,
-                            "com.example.myapplication.fileprovider",imageFile);
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
+            pickedImgUri = FileProvider.getUriForFile(MainActivity.this,
+                    "com.example.myapplication.fileprovider",imageFile);
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT,pickedImgUri);
 
-                    startActivityForResult(intent, CAMERA_CODE);
+            startActivityForResult(intent, CAMERA_CODE);
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        uploadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkAndRequestForPermission();
-            }
-        });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -129,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                Toast.makeText(MainActivity.this,"Please accept for required permission",Toast.LENGTH_SHORT).show();
+                showMessage("Please accept for required permission");
             }
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
@@ -165,6 +229,38 @@ public class MainActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
             imageView.setImageBitmap(bitmap);
         }
+
+    }
+
+    /**
+     * Check if the input values are empty.
+     * @param itemName item name
+     * @param itemDescription item description
+     * @param contactInfo contact information
+     * @param itemPrice item price
+     * @return true if all filled; false if at least one is empty
+     */
+    private boolean checkPostValidity (String itemName, String itemDescription, String contactInfo, String itemPrice){
+        boolean result = false;
+        if(itemName.isEmpty())
+            showMessage("All fields are required: Please enter the item name");
+        else if(itemDescription.isEmpty())
+            showMessage("All fields are required: Please enter the item description");
+        else if(itemPrice.isEmpty())
+            showMessage("All fields are required: Please check the price field");
+        else if(contactInfo.isEmpty())
+            showMessage("All fields are required: Please leave your contact information");
+        else
+            result = true;
+        return result;
+    }
+
+    /**
+     * Create a Toast message at the bottom of the screen
+     * @param text message
+     */
+    private void showMessage (String text){
+        Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
     }
 
 }
