@@ -58,8 +58,8 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
     private void signUp(String email, String password) {
-        Intent mainActivity = new Intent(getApplicationContext(),MainActivity.class);
-        startActivity(mainActivity);
+        Intent loginActivity = new Intent(getApplicationContext(),LoginActivity.class);
+        startActivity(loginActivity);
         finish();
         //TODO Sign up process
     }
