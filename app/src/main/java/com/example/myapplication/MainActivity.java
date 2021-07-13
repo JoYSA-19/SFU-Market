@@ -94,17 +94,19 @@ public class MainActivity extends AppCompatActivity {
      * @param builder AlertDialog
      */
     private void makePost(AlertDialog builder) {
+        //Get values from text field variables
         String textbook_name = nameText.getText().toString();
         String description_text = descriptionText.getText().toString();
         String stringUserId = idText.getText().toString();
         String stringItemPrice = priceText.getText().toString();
+        //Convert user_id into an integer
         int user_id = 0;
         try {
             user_id = Integer.parseInt(stringUserId);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        //convert item_price into a double
         double item_price = 0;
         try {
             item_price = Double.parseDouble(stringItemPrice);
@@ -112,29 +114,35 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        double finalItem_price = item_price;
+        //Convert variables into valid JSON
+        JSONObject json = createJson(user_id, textbook_name, item_price, description_text);
 
-        int finalUser_id = user_id;
+        //Start a new thread to execute HTTP request
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Post JSON to server
+                doPostRequest(URL, String.valueOf(json));
+            }
+        }).start();
 
+        //Close the data_entry_dialog
+        builder.dismiss();
+    }
+
+    //Format data into JSON
+    JSONObject createJson(Integer user_id, String textbook_name, Double item_price, String description_text) {
         JSONObject json = new JSONObject();
         try {
             json.put("user_id", user_id);
             json.put("textbook_name", textbook_name);
-            json.put("suggested_price", finalItem_price);
+            json.put("suggested_price", item_price);
             json.put("photo_filepath", "../../photos/gasps.png");
             json.put("description_text", description_text);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                doPostRequest(URL, String.valueOf(json));
-            }
-        }).start();
-
-        builder.dismiss();
+        return json;
     }
 
     void doPostRequest(String url, String json) {
