@@ -42,7 +42,8 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private String URL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
+    private String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
+    private String feedURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
     private static final int UPLOAD_CODE = 1;
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 //Post JSON to server
-                doPostRequest(URL, String.valueOf(json));
+                doPostRequest(postURL, String.valueOf(json));
             }
         }).start();
 

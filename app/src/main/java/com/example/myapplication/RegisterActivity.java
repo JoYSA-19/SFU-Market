@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    private String registerURL = "http://10.0.2.2:80/PHP-Backend/api/post/register.php";
     private EditText userEmail, userPassword, confirmPassword;
     private Button signUpBtn;
     private TextView loginTxt;

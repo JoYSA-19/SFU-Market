@@ -1,6 +1,13 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +18,23 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 /**
  * Login Page
  */
 public class LoginActivity extends AppCompatActivity {
 
+    private String loginURL = "http://10.0.2.2:80/PHP-Backend/api/post/login.php";
     private EditText userEmail, userPassword;
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;
     private ProgressBar progressBar;
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,13 +75,59 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn(String email, String password) {
-        Intent mainActivity = new Intent(getApplicationContext(),MainActivity.class);
-        startActivity(mainActivity);
-        finish();
-        //TODO Sign in process
+        //Prepare JSON file for login request
+        JSONObject json = createJson(email, password);
+
+        //Create login request
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Post JSON to server
+                doLoginRequest(loginURL, String.valueOf(json));
+            }
+        }).start();
     }
 
-    private void showMessage (String text){
+    JSONObject createJson(String sfu_id, String user_password) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("sfu_id", sfu_id);
+            json.put("password", user_password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+    void doLoginRequest(String url, String json) {
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String mMessage = response.body().string();
+                Log.e("success", mMessage);
+                //Send to MainActivity
+                Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(mainActivity);
+                finish();
+            }
+        });
+    }
+
+    private void showMessage(String text) {
         Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
     }
 }
