@@ -33,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;
     private ProgressBar progressBar;
+    private Boolean result = false;
+    private Toast message;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -54,15 +56,19 @@ public class LoginActivity extends AppCompatActivity {
             loginBtn.setVisibility(View.INVISIBLE);
             final String email = userEmail.getText().toString();
             final String password = userPassword.getText().toString();
-
+            message = showMessage("Incorrect SFU ID or password");
             if (email.isEmpty() || password.isEmpty()){
-                showMessage("Please enter your user email address or password");
+                showMessage("Please enter your SFU ID or password").show();
                 loginBtn.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
             }
             else
                 signIn(email,password);
 
+            if(!result) {
+                progressBar.setVisibility(View.INVISIBLE);
+                loginBtn.setVisibility(View.VISIBLE);
+            }
         });
 
         //Switch to RegisterActivity
@@ -111,23 +117,27 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call call, IOException e) {
                 String mMessage = e.getMessage();
-                Log.w("failure Response", mMessage);
+                Log.w("Failure Response", mMessage);
                 //call.cancel();
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String mMessage = response.body().string();
-                Log.e("success", mMessage);
                 //Send to MainActivity
-                Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(mainActivity);
-                finish();
+                if(response.isSuccessful()) {
+                    result = true;
+                    Log.d("Response", "200");
+                    Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(mainActivity);
+                    finish();
+                } else {
+                    message.show();
+                }
             }
         });
     }
 
-    private void showMessage(String text) {
-        Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
+    private Toast showMessage(String text) {
+        return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
 }
