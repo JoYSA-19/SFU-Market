@@ -131,6 +131,7 @@ public class LoginActivity extends AppCompatActivity {
                     startActivity(mainActivity);
                     finish();
                 } else {
+                    Log.d("Response", String.valueOf(response.code()));
                     message.show();
                 }
             }
