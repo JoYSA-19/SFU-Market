@@ -28,15 +28,15 @@
 
     $databaseValue = $row['password'];
 
-    //if there is no data, return error code 404
+    //If something went wrong, return error code 404
     if($row = false) {
         echo http_response_code(404);
     }
-    //if the correct password is with an existing SFU ID, return 200 OK
+    //If the correct password is with an existing SFU ID, return code 200 OK
     else if(strcmp($databaseValue, $data->password) == 0) {
         echo http_response_code(200);
     }
-    //Otherwise return code 403 for incorrect password to an existing SFU ID
+    //Otherwise return error code 403 no matching password with SFU ID
     else {
         echo http_response_code(403);
     }
