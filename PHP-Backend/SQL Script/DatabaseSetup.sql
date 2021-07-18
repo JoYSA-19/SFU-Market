@@ -19,7 +19,7 @@ CREATE TABLE posts (
     description_text LONGTEXT NOT NULL,
     post_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    FOREIGN KEY (user_id) REFERENCES user(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE items (
@@ -49,7 +49,7 @@ CREATE TABLE professor_item_table (
     item_id INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (class_id) REFERENCES class(id),
-    FOREIGN KEY (item_id) REFERENCES item(id)
+    FOREIGN KEY (item_id) REFERENCES items(id)
 );
 
 INSERT INTO users (last_name, first_name, sfu_id, phone_number, password)
