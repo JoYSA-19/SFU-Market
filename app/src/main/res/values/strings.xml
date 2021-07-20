@@ -20,4 +20,7 @@
     <string name="already_registered">Already Registered?</string>
     <string name="registerTextLogin">Login</string>
     <string name="registerSignUp">Sign Up</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number">Phone Number</string>
 </resources>
