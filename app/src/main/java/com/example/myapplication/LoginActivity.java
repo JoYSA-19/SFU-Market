@@ -11,16 +11,12 @@ import okhttp3.Response;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.vishnusivadas.advanced_httpurlconnection.PutData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +28,7 @@ import java.io.IOException;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private String loginURL = "http://10.0.2.2:80/PHP-Backend/api/post/login.php";
+    private String loginURL = "http://10.0.2.2:81/PHP-Backend/api/post/login.php";
     private EditText userEmail, userPassword;
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;
@@ -52,55 +48,96 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn = findViewById(R.id.loginButton);
         signUpBtn = findViewById(R.id.signUpButton);
         progressBar = findViewById(R.id.loginProgressBar);
+
         progressBar.setVisibility(View.INVISIBLE);
 
+        loginBtn.setOnClickListener(v -> {
+            progressBar.setVisibility(View.VISIBLE);
+            loginBtn.setVisibility(View.INVISIBLE);
+            final String email = userEmail.getText().toString();
+            final String password = userPassword.getText().toString();
+            message = showMessage("Incorrect SFU ID or password");
+            if (email.isEmpty() || password.isEmpty()){
+                showMessage("Please enter your SFU ID or password").show();
+                loginBtn.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+            else
+                signIn(email,password);
+
+            if(!result) {
+                progressBar.setVisibility(View.INVISIBLE);
+                loginBtn.setVisibility(View.VISIBLE);
+            }
+        });
+
+        //Switch to RegisterActivity
         signUpBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(),RegisterActivity.class);
-            startActivity(intent);
+            Intent registerActivity = new Intent(getApplicationContext(),RegisterActivity.class);
+            startActivity(registerActivity);
             finish();
         });
 
-        loginBtn.setOnClickListener(v -> {
-            String sfu_id, password;
-            sfu_id = String.valueOf(userEmail.getText());
-            password = String.valueOf(userPassword.getText());
+    }
 
-            if (sfu_id.equals("") || password.equals("")) {
-                showMessage("All fields required");
-            } else {
-                progressBar.setVisibility(View.VISIBLE);
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> {
-                    //Starting Write and Read data with URL
-                    //Creating array for parameters
-                    String[] field = new String[2];
-                    field[0] = "sfu_id";
-                    field[1] = "password";
-                    //Creating array for data
-                    String[] data = new String[2];
-                    data[0] = sfu_id;
-                    data[1] = password;
-                    PutData putData = new PutData("http://10.0.2.2:80/PHP-Backend/api/post/login.php", "POST", field, data);
-                    if (putData.startPut()) {
-                        if (putData.onComplete()) {
-                            progressBar.setVisibility(View.GONE);
-                            String result = putData.getResult();
-                            result = result.trim();
-                            if (result.equals("Login Successful")) {
-                                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                showMessage(result);
-                            }
-                        }
-                    }
-                });
+    private void signIn(String email, String password) {
+        //Prepare JSON file for login request
+        JSONObject json = createJson(email, password);
+
+        //Create login request
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Post JSON to server
+                doLoginRequest(loginURL, String.valueOf(json));
+            }
+        }).start();
+    }
+
+    JSONObject createJson(String sfu_id, String user_password) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("sfu_id", sfu_id);
+            json.put("password", user_password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+    void doLoginRequest(String url, String json) {
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("Failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if(response.isSuccessful()) {
+                    result = true;
+                    Log.d("Response", "200");
+                    Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(mainActivity);
+                    finish();
+                } else {
+                    Log.d("Response", String.valueOf(response.code()));
+                    message.show();
+                }
             }
         });
     }
 
-    private void showMessage (String text){
-        Toast.makeText(getApplicationContext(),text,Toast.LENGTH_SHORT).show();
+    private Toast showMessage(String text) {
+        return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
 }

@@ -19,6 +19,31 @@
         app:srcCompat="@drawable/user_account_management_logo_user_icon_11562867145a56rus2zwu" />
 
     <EditText
+        android:id="@+id/inputEmail"
+        android:layout_width="265dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:autofillHints="@string/user_email"
+        android:ems="10"
+        android:hint="@string/sfu_computing_id"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
+
+    <EditText
+        android:id="@+id/inputPassword"
+        android:layout_width="265dp"
+        android:layout_height="wrap_content"
+        android:autofillHints="@string/password"
+        android:ems="10"
+        android:hint="@string/password"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
+
+    <EditText
         android:id="@+id/confirmPassword"
         android:layout_width="265dp"
         android:layout_height="wrap_content"
@@ -32,15 +57,16 @@
         app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
 
     <EditText
-        android:id="@+id/phoneNumber"
-        android:layout_width="265dp"
+        android:id="@+id/firstName"
+        android:layout_width="132.5dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="132dp"
-        android:autofillHints="@string/password"
+        android:layout_marginTop="88dp"
+        android:autofillHints="@string/first_name"
         android:ems="10"
-        android:hint="@string/phone_number"
-        android:inputType="phone"
+        android:hint="@string/first_name"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.258"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
 
@@ -52,23 +78,22 @@
         android:autofillHints="@string/last_name"
         android:ems="10"
         android:hint="@string/last_name"
-        android:inputType="textPassword"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.737"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
 
     <EditText
-        android:id="@+id/firstName"
-        android:layout_width="132.5dp"
+        android:id="@+id/phoneNumber"
+        android:layout_width="265dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="88dp"
-        android:autofillHints="@string/first_name"
+        android:layout_marginTop="132dp"
+        android:autofillHints="@string/password"
         android:ems="10"
-        android:hint="@string/first_name"
-        android:inputType="textPassword"
+        android:hint="@string/phone_number"
+        android:inputType="phone"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.258"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
 
@@ -121,30 +146,5 @@
         app:layout_constraintHorizontal_bias="0.437"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmPassword" />
-
-    <EditText
-        android:id="@+id/inputEmail"
-        android:layout_width="265dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="68dp"
-        android:autofillHints="@string/user_email"
-        android:ems="10"
-        android:hint="@string/sfu_computing_id"
-        android:inputType="textEmailAddress"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
-
-    <EditText
-        android:id="@+id/inputPassword"
-        android:layout_width="265dp"
-        android:layout_height="wrap_content"
-        android:autofillHints="@string/password"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/inputEmail" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

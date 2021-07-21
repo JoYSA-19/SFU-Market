@@ -24,7 +24,7 @@
         android:autofillHints="@string/user_email"
         android:ems="10"
         android:hint="@string/sfu_computing_id"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         app:layout_constraintBottom_toTopOf="@+id/inputPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
