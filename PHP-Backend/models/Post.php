@@ -23,12 +23,12 @@
         public function create() {
             //Create query
             $query = 'INSERT INTO ' . $this->table . '
-                SET
-                    user_id = :user_id,
-                    textbook_name = :textbook_name,
-                    suggested_price = :suggested_price,
-                    photo_filepath = :photo_filepath,
-                    description_text = :description_text';
+                        SET
+                            user_id = :user_id,
+                            textbook_name = :textbook_name,
+                            suggested_price = :suggested_price,
+                            photo_filepath = :photo_filepath,
+                            description_text = :description_text';
 
             //Prepare statement
             $stmt = $this->conn->prepare($query);
@@ -46,6 +46,7 @@
             $stmt->bindParam(':suggested_price', $this->suggested_price);
             $stmt->bindParam(':photo_filepath', $this->photo_filepath);
             $stmt->bindParam(':description_text', $this->description_text);
+
             //Execute query
             if($stmt->execute()) {
                 return true;
@@ -57,4 +58,17 @@
             return false;
         }
 
+        //Get from database
+        public function read() {
+            //Create query
+            $query = 'SELECT * FROM ' . $this->table;
+
+            //Prepare statement
+            $stmt = $this->conn->prepare($query);
+
+            //Execute query
+            $stmt->execute();
+
+            return $stmt;
+        }
     }

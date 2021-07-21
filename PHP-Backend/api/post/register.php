@@ -1,17 +1,27 @@
 <?php
-    require "../../config/RegisterDatabase.php";
-    $db = new RegisterDataBase();
-    if (isset($_POST['last_name']) && isset($_POST['first_name']) && isset($_POST['sfu_id']) && isset($_POST['phone_number']) && isset($_POST['password'])) {
-        if ($db->dbConnect()) {
-            if ($db->signUp("users", $_POST['last_name'], $_POST['first_name'], $_POST['sfu_id'], $_POST['phone_number'], $_POST['password'])) {
-                echo "Sign Up Success";
-            } else {
-                echo "Sign up Failed";
-            }
-        } else {
-            echo "Error: Database connection";
-        }
+    header('Access-Control-Allow-Origin: *');
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Methods: POST');
+    header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type,
+    Access-Control-Allow-Methods, Authorization, X-Requested-With');
+
+    include_once '../../config/Database.php';
+    include_once '../../models/Account.php';
+
+    //Instantiate database & connect
+    $database = new Database();
+    $db = $database->connect();
+
+    //Instantiate post object
+    $verify = new Account($db);
+    $account = new Account($db);
+
+    //Get raw posted data
+    $data = json_decode(file_get_contents("php://input"));
+
+    //Create account
+    if ($account->create($data->first_name, $data->last_name, $data->phone_number, $data->sfu_id, $data->password)) {
+        echo http_response_code(200);
     } else {
-        echo "All fields are required";
+        echo http_response_code(403);
     }
-?>
