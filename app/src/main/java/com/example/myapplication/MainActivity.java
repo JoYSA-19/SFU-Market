@@ -42,8 +42,8 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private String postURL = "http://10.0.2.2:81/PHP-Backend/api/post/create.php";
-    private String feedURL = "http://10.0.2.2:81/PHP-Backend/api/post/feed.php";
+    private String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
+    //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
     private String currentPhotoPath;
     private Uri pickedImgUri = null;
     private static final int UPLOAD_CODE = 1;
