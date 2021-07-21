@@ -62,9 +62,8 @@ public class MainActivity extends AppCompatActivity {
 
         findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
     }
-
     /**
-     * Shows the dialog and allows the user to enter information:
+     *  Shows the dialog and allows the user to enter information:
      *  item name, item description, photo and contact information
      */
     private void handlePostDialog() {
@@ -73,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
         builder.setView(view);
         builder.show();
-
         //assigning text fields and buttons to a variable
         Button postBtn = view.findViewById(R.id.btnPost);
         ImageButton cameraBtn = view.findViewById(R.id.cameraButton);
@@ -88,8 +86,6 @@ public class MainActivity extends AppCompatActivity {
         cameraBtn.setOnClickListener(view1 -> takePhoto());
         uploadBtn.setOnClickListener(v -> checkAndRequestForPermission());
     }
-
-
     /**
      * The method makePost will make a post by getting user input and send to the back-end
      * @param builder AlertDialog
@@ -114,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-
         //Convert variables into valid JSON
         JSONObject json = createJson(user_id, textbook_name, item_price, description_text);
 
@@ -130,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         //Close the data_entry_dialog
         builder.dismiss();
     }
-
     //Format data into JSON
     JSONObject createJson(Integer user_id, String textbook_name, Double item_price, String description_text) {
         JSONObject json = new JSONObject();
@@ -145,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return json;
     }
-
     void doPostRequest(String url, String json) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, json);
@@ -164,13 +157,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
                 String mMessage = response.body().string();
                 Log.e("success", mMessage);
             }
         });
     }
-
     /**
      * This function will take the user to the camera and take a photo of their item.
      * With permission given.
@@ -194,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
     /**
      * Ask permission from the user, once approved, open the gallery
      */
@@ -217,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(galleryIntent, UPLOAD_CODE);
         }
     }
-
     /**
      * After user picked an image, get the image and show it in the preview
      * @param requestCode request code
@@ -240,7 +229,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
     /**
      * Check if the input values are empty.
      * @param itemName item name
@@ -263,11 +251,7 @@ public class MainActivity extends AppCompatActivity {
             result = true;
         return result;
     }
-
-    /**
-     * Create a Toast message at the bottom of the screen
-     * @param text message
-     */
+    //Helper function for displaying toast message
     private void showMessage (String text){
         Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
     }

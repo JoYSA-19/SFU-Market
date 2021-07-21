@@ -25,6 +25,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+/**
+ * Registration Page
+ */
 public class RegisterActivity extends AppCompatActivity {
 
     private String registerURL = "http://35.183.197.126/PHP-Backend/api/post/register.php";
@@ -54,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
         loginTxt = findViewById(R.id.loginText);
 
         progressBar.setVisibility(View.INVISIBLE);
+
         signUpBtn.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
             signUpBtn.setVisibility(View.INVISIBLE);
@@ -64,8 +68,8 @@ public class RegisterActivity extends AppCompatActivity {
             final String last_name = lastName.getText().toString();
             final String phone_number = phoneNumber.getText().toString();
             message = showMessage("Account Already Exists");
-
-            if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()){
+            //Check for valid password form input
+            if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()) {
                 showMessage("All fields required").show();
                 signUpBtn.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
@@ -83,10 +87,8 @@ public class RegisterActivity extends AppCompatActivity {
                 showMessage("Passwords do not match").show();
                 signUpBtn.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
-            }
-            else {
+            } else {
                 signUp(sfu_id, password, first_name, last_name, phone_number);
-
                 if(!result) {
                     progressBar.setVisibility(View.INVISIBLE);
                     signUpBtn.setVisibility(View.VISIBLE);
@@ -99,11 +101,11 @@ public class RegisterActivity extends AppCompatActivity {
             startActivity(loginIntent);
         });
     }
+    //Function posts data to backend
     private void signUp(String sfu_id, String password, String first_name, String last_name, String phone_number) {
-        //Prepare JSON file for login request
+        //Prepare JSON file for sign up request
         JSONObject json = createJson(sfu_id, password, first_name, last_name, phone_number);
-
-        //Create login request
+        //Creates sign up request
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -112,7 +114,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }).start();
     }
-
+    //Function prepares JSON file for post
     JSONObject createJson(String sfu_id, String user_password, String first_name, String last_name, String phone_number) {
         JSONObject json = new JSONObject();
         try {
@@ -126,7 +128,11 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return json;
     }
-
+    /**
+     * Function interacts with backend to post
+     * @param url Database address
+     * @param json Registration JSON Data
+     */
     void doRegisterRequest(String url, String json) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, json);
@@ -134,7 +140,6 @@ public class RegisterActivity extends AppCompatActivity {
                 .url(url)
                 .post(body)
                 .build();
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -142,7 +147,6 @@ public class RegisterActivity extends AppCompatActivity {
                 Log.w("failure Response", mMessage);
                 //call.cancel();
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()) {
@@ -158,7 +162,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
-
+    //Minimum password complexity; checks if requirements for password is met
     private boolean passwordChecker(String password) {
         if (password.length() <= 8) {
             return false;
@@ -188,7 +192,7 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
     }
-
+    //Helper function for displaying toast message
     private Toast showMessage (String text) {
         return Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
     }

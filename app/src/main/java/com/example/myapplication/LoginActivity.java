@@ -57,29 +57,24 @@ public class LoginActivity extends AppCompatActivity {
             final String email = userEmail.getText().toString();
             final String password = userPassword.getText().toString();
             message = showMessage("Incorrect SFU ID or password");
-            if (email.isEmpty() || password.isEmpty()){
+            if (email.isEmpty() || password.isEmpty()) {
                 showMessage("Please enter your SFU ID or password").show();
                 loginBtn.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
-            }
-            else
-                signIn(email,password);
-
-            if(!result) {
+            } else signIn(email,password);
+            if (!result) {
                 progressBar.setVisibility(View.INVISIBLE);
                 loginBtn.setVisibility(View.VISIBLE);
             }
         });
-
         //Switch to RegisterActivity
         signUpBtn.setOnClickListener(v -> {
             Intent registerActivity = new Intent(getApplicationContext(),RegisterActivity.class);
             startActivity(registerActivity);
             finish();
         });
-
     }
-
+    //Function posts data to backend
     private void signIn(String email, String password) {
         //Prepare JSON file for login request
         JSONObject json = createJson(email, password);
@@ -93,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         }).start();
     }
-
+    //Function prepares JSON file for post
     JSONObject createJson(String sfu_id, String user_password) {
         JSONObject json = new JSONObject();
         try {
@@ -104,7 +99,11 @@ public class LoginActivity extends AppCompatActivity {
         }
         return json;
     }
-
+    /**
+     * Function interacts with backend to post
+     * @param url Database address
+     * @param json Registration JSON Data
+     */
     void doLoginRequest(String url, String json) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, json);
@@ -112,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
                 .url(url)
                 .post(body)
                 .build();
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -120,7 +118,6 @@ public class LoginActivity extends AppCompatActivity {
                 Log.w("Failure Response", mMessage);
                 //call.cancel();
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()) {
@@ -136,7 +133,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
+    //Helper function for displaying toast message
     private Toast showMessage(String text) {
         return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
