@@ -2,7 +2,7 @@ SFU Market
 
 Preface
 ------------------------------------
-For this Iteration, we have successfully shifted to PHP and MySQL as our backend. The relational database will be helpful for adding features later on. For example, tying textbooks to professors would be easier if multiple teachers have the same textbook and vice versa. Additionally, we are using AWS for hosting our web server so this time, there should not be a need to download any backend code and should simply run with just the frontend code.
+For this Iteration, we have successfully shifted to PHP and MySQL as our backend. The relational database will be helpful for adding features later on. For example, tying textbooks to professors would be easier if multiple teachers have the same textbook and vice versa. Additionally, we are using AWS for hosting our web server so this time, there should not be a need to download any backend code and should simply run with just the frontend code. The current running backend code is available to be viewed under the PHP-Backend folder.
 
 Introduction
 ------------------------------------
