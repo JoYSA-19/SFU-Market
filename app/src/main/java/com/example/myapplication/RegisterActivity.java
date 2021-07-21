@@ -33,6 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Boolean result = false;
     private Toast message;
+    boolean upperCase, lowerCase, number, specialChar = false;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -65,6 +66,16 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()){
                 showMessage("All fields required").show();
+                signUpBtn.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
+            } else if (!passwordChecker(password)) {
+                showMessage("Minimum Complexity Password not met!\n" +
+                        "Password must contain:\n" +
+                        "1 upper case letter\n" +
+                        "1 lower case letter\n" +
+                        "1 special character\n" +
+                        "1 number\n" +
+                        "at least 8 characters long").show();
                 signUpBtn.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
             } else if (!password.equals(confPassword)) {
@@ -145,6 +156,36 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private boolean passwordChecker(String password) {
+        if (password.length() <= 8) {
+            return false;
+        }
+        for (int i = 0; i < password.length(); i++) {
+            char ch = password.charAt(i);
+            if (!specialChar && !Character.isLetterOrDigit(ch)) {
+                specialChar = true;
+            } else {
+                if (!number && Character.isDigit(ch)) {
+                    number = true;
+                } else {
+                    if (!upperCase || !lowerCase) {
+                        if (Character.isUpperCase(ch)) {
+                            upperCase = true;
+                        }
+                        if (Character.isLowerCase(ch)) {
+                            lowerCase = true;
+                        }
+                    }
+                }
+            }
+        }
+        if ((upperCase && lowerCase && specialChar && number)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private Toast showMessage (String text) {
