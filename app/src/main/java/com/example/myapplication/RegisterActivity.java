@@ -163,18 +163,22 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
     //Minimum password complexity; checks if requirements for password is met
+    //Source: https://ssaurel.medium.com/develop-a-password-strength-calculator-application-for-android-de3711ba7959
     private boolean passwordChecker(String password) {
         if (password.length() <= 8) {
-            return false;
+            return false; //password length is too short
         }
         for (int i = 0; i < password.length(); i++) {
             char ch = password.charAt(i);
+            //determines if a special character is present
             if (!specialChar && !Character.isLetterOrDigit(ch)) {
                 specialChar = true;
             } else {
+                //determines if a number is present
                 if (!number && Character.isDigit(ch)) {
                     number = true;
                 } else {
+                    //determines if a letter is present and which type of letter (upper or lower)
                     if (!upperCase || !lowerCase) {
                         if (Character.isUpperCase(ch)) {
                             upperCase = true;
@@ -186,6 +190,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         }
+        //once all the conditions are met, return true
         if ((upperCase && lowerCase && specialChar && number)) {
             return true;
         } else {
