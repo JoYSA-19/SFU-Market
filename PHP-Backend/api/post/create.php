@@ -1,4 +1,5 @@
 <?php
+    //All backend code largly follows this youtube tutorial and the 3 part series: https://www.youtube.com/watch?v=OEWXbpUMODk
     header('Access-Control-Allow-Origin: *');
     header('Content-Type: application/json');
     header('Access-Control-Allow-Methods: POST');
