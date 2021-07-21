@@ -18,6 +18,7 @@
     //Get raw posted data
     $data = json_decode(file_get_contents("php://input"));
 
+    //Bind data
     $post->user_id = $data->user_id;
     $post->textbook_name = $data->textbook_name;
     $post->suggested_price = $data->suggested_price;
