@@ -28,7 +28,11 @@ import java.io.IOException;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    private String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
+    //for server testing
+    //private String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
+    //for local testing
+    private String loginURL = "http://10.0.2.2:81/PHP-Backend/api/post/login.php";
+
     private EditText userEmail, userPassword;
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;

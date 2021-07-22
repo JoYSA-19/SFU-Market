@@ -9,6 +9,7 @@ import androidx.core.content.FileProvider;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -17,6 +18,7 @@ import okhttp3.Response;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -34,23 +36,33 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 /**
  * The home page including post button, which will open up a dialog for posting instantly
  */
 public class MainActivity extends AppCompatActivity {
 
-    private String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
+    //for server testing
+    //private String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
     //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
+    //for local testing
+    private String postURL = "http://10.0.2.2:81/PHP-Backend/api/post/create.php";
+    //private String feedURL = "http://10.0.2.2:81/PHP-Backend/api/post/feed.php";
+
     private String currentPhotoPath;
-    private Uri pickedImgUri = null;
+    private Uri pickedImgUri;
     private static final int UPLOAD_CODE = 1;
     private static final int CAMERA_CODE = 2;
     private static final int REQUEST_CODE = 3;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    public MediaType PNG;
 
     private EditText nameText, descriptionText, idText, priceText;
     private ImageView imageView;
@@ -94,54 +106,43 @@ public class MainActivity extends AppCompatActivity {
         //Get values from text field variables
         String textbook_name = nameText.getText().toString();
         String description_text = descriptionText.getText().toString();
-        String stringUserId = idText.getText().toString();
-        String stringItemPrice = priceText.getText().toString();
-        //Convert user_id into an integer
-        int user_id = 0;
-        try {
-            user_id = Integer.parseInt(stringUserId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //convert item_price into a double
-        double item_price = 0;
-        try {
-            item_price = Double.parseDouble(stringItemPrice);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
-        //Convert variables into valid JSON
-        JSONObject json = createJson(user_id, textbook_name, item_price, description_text);
+        String user_id = idText.getText().toString();
+        String suggested_price = priceText.getText().toString();
 
-        //Start a new thread to execute HTTP request
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //Post JSON to server
-                doPostRequest(postURL, String.valueOf(json));
-            }
-        }).start();
+        //Check if all the fields have been filled in
+        if(checkPostValidity(textbook_name, description_text, user_id, suggested_price)) {
+            //Start a new thread to execute HTTP request
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    //Post data to server
+                    doPostRequest(postURL, user_id, textbook_name, suggested_price, description_text);
+                }
+            }).start();
 
-        //Close the data_entry_dialog
-        builder.dismiss();
+            //Close the data_entry_dialog
+            builder.dismiss();
+        }
     }
-    //Format data into JSON
-    JSONObject createJson(Integer user_id, String textbook_name, Double item_price, String description_text) {
-        JSONObject json = new JSONObject();
+
+    void doPostRequest(String url, String user_id, String textbook_name, String suggested_price, String description_text) {
+        PNG = MediaType.parse(getContentResolver().getType(pickedImgUri));
+        InputStream iStream = null;
         try {
-            json.put("user_id", user_id);
-            json.put("textbook_name", textbook_name);
-            json.put("suggested_price", item_price);
-            json.put("photo_filepath", "../../photos/gasps.png");
-            json.put("description_text", description_text);
-        } catch (JSONException e) {
+            iStream = getContentResolver().openInputStream(pickedImgUri);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return json;
-    }
-    void doPostRequest(String url, String json) {
+        byte[] inputData = getBytes(iStream);
         OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(JSON, json);
+        RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("user_id", user_id)
+                .addFormDataPart("textbook_name", textbook_name)
+                .addFormDataPart("suggested_price", suggested_price)
+                .addFormDataPart("description_text", description_text)
+                .addFormDataPart("file", getContentResolver().getType(pickedImgUri), RequestBody.create(PNG, inputData))
+                .build();
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
@@ -220,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == UPLOAD_CODE && data != null ) {
             // the user has successfully picked an image
             // we need to save its reference to a Uri variable
-            pickedImgUri = data.getData() ;
+            pickedImgUri = data.getData();
             imageView.setImageURI(pickedImgUri);
         }
         else if(resultCode == RESULT_OK && requestCode == CAMERA_CODE && data != null ){
@@ -233,24 +234,43 @@ public class MainActivity extends AppCompatActivity {
      * Check if the input values are empty.
      * @param itemName item name
      * @param itemDescription item description
-     * @param contactInfo contact information
-     * @param itemPrice item price
+     * @param userId contact information
+     * @param suggestedPrice item price
      * @return true if all filled; false if at least one is empty
      */
-    private boolean checkPostValidity (String itemName, String itemDescription, String contactInfo, String itemPrice){
+    private boolean checkPostValidity (String itemName, String itemDescription, String userId, String suggestedPrice){
         boolean result = false;
         if(itemName.isEmpty())
             showMessage("All fields are required: Please enter the item name");
         else if(itemDescription.isEmpty())
             showMessage("All fields are required: Please enter the item description");
-        else if(itemPrice.isEmpty())
-            showMessage("All fields are required: Please check the price field");
-        else if(contactInfo.isEmpty())
-            showMessage("All fields are required: Please leave your contact information");
+        else if(suggestedPrice.isEmpty())
+            showMessage("All fields are required: Please add a suggested price");
+        else if(userId.isEmpty())
+            showMessage("All fields are required: Please enter your userId");
         else
             result = true;
         return result;
     }
+
+    //https://stackoverflow.com/questions/10296734/image-uri-to-bytesarray
+    public byte[] getBytes(InputStream inputStream) {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        int len = 0;
+        while (true) {
+            try {
+                if (!((len = inputStream.read(buffer)) != -1)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            byteBuffer.write(buffer, 0, len);
+        }
+        return byteBuffer.toByteArray();
+    }
+
     //Helper function for displaying toast message
     private void showMessage (String text){
         Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
