@@ -61,9 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_CODE = 2;
     private static final int REQUEST_CODE = 3;
 
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public MediaType PNG;
-
+    public MediaType png;
     private EditText nameText, descriptionText, idText, priceText;
     private ImageView imageView;
 
@@ -126,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void doPostRequest(String url, String user_id, String textbook_name, String suggested_price, String description_text) {
-        PNG = MediaType.parse(getContentResolver().getType(pickedImgUri));
+        png = MediaType.parse(getContentResolver().getType(pickedImgUri));
         InputStream iStream = null;
         try {
             iStream = getContentResolver().openInputStream(pickedImgUri);
@@ -141,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 .addFormDataPart("textbook_name", textbook_name)
                 .addFormDataPart("suggested_price", suggested_price)
                 .addFormDataPart("description_text", description_text)
-                .addFormDataPart("file", getContentResolver().getType(pickedImgUri), RequestBody.create(PNG, inputData))
+                .addFormDataPart("file", getContentResolver().getType(pickedImgUri), RequestBody.create(png, inputData))
                 .build();
         Request request = new Request.Builder()
                 .url(url)
