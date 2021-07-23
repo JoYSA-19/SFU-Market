@@ -40,8 +40,8 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView loginTxt;
     private ProgressBar progressBar;
     private Boolean result = false;
-    private Toast message;
-    boolean upperCase, lowerCase, number, specialChar = false;
+    private Toast accountExists, missingFields, passwordComplexity, passwordMatch;
+    private boolean upperCase, lowerCase, number, specialChar = false;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -57,54 +57,82 @@ public class RegisterActivity extends AppCompatActivity {
         lastName = findViewById(R.id.lastName);
         phoneNumber = findViewById(R.id.phoneNumber);
         signUpBtn = findViewById(R.id.signUpButton);
-        progressBar = findViewById(R.id.loginProgressBar);
         loginTxt = findViewById(R.id.loginText);
-
+        progressBar = findViewById(R.id.loginProgressBar);
         progressBar.setVisibility(View.INVISIBLE);
 
-        signUpBtn.setOnClickListener(v -> {
-            progressBar.setVisibility(View.VISIBLE);
-            signUpBtn.setVisibility(View.INVISIBLE);
-            final String sfu_id = userId.getText().toString();
-            final String password = userPassword.getText().toString();
-            final String confPassword = confirmPassword.getText().toString();
-            final String first_name = firstName.getText().toString();
-            final String last_name = lastName.getText().toString();
-            final String phone_number = phoneNumber.getText().toString();
-            message = showMessage("Account Already Exists");
-            //Check for valid password form input
-            if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()) {
-                showMessage("All fields required").show();
-                signUpBtn.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            } else if (!passwordChecker(password)) {
-                showMessage("Minimum Complexity Password not met!\n" +
-                        "Password must contain:\n" +
-                        "1 upper case letter\n" +
-                        "1 lower case letter\n" +
-                        "1 special character\n" +
-                        "1 number\n" +
-                        "at least 8 characters long").show();
-                signUpBtn.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            } else if (!password.equals(confPassword)) {
-                showMessage("Passwords do not match").show();
-                signUpBtn.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.INVISIBLE);
-            } else {
-                signUp(sfu_id, password, first_name, last_name, phone_number);
-                if(!result) {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    signUpBtn.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        //Switch to LoginActivity
-        loginTxt.setOnClickListener(view -> {
-            Intent loginIntent = new Intent(getApplicationContext(),LoginActivity.class);
-            startActivity(loginIntent);
-        });
+        //Predefine toast messages
+        accountExists = showMessage("Account Already Exists");
+        missingFields = showMessage("All fields required");
+        passwordComplexity = showMessage("Minimum Complexity Password not met!\n" +
+                "Password must contain:\n" +
+                "1 upper case letter\n" +
+                "1 lower case letter\n" +
+                "1 special character\n" +
+                "1 number\n" +
+                "at least 8 characters long");
+        passwordMatch = showMessage("Passwords do not match");
+
+        signUpBtn.setOnClickListener(v -> signupOnPress());
+        loginTxt.setOnClickListener(view -> loginOnPress());
     }
+
+    //Verify Sign up
+    private void signupOnPress() {
+        //Start loading bar on sign up button
+        signUpBtn.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        //Finalize currently inputted values into string
+        final String sfu_id = userId.getText().toString();
+        final String password = userPassword.getText().toString();
+        final String confPassword = confirmPassword.getText().toString();
+        final String first_name = firstName.getText().toString();
+        final String last_name = lastName.getText().toString();
+        final String phone_number = phoneNumber.getText().toString();
+
+        //Check if form is valid
+        if(!signUpValidator(sfu_id, password, confPassword, first_name, last_name, phone_number)) {
+            signUpBtn.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+        } else {
+            signUp(sfu_id, password, first_name, last_name, phone_number);
+            //Show signup button again if sign up failed
+            if(!result) {
+                signUpBtn.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    //Switches to loginActivity
+    private void loginOnPress() {
+        Intent loginIntent = new Intent(getApplicationContext(),LoginActivity.class);
+        startActivity(loginIntent);
+    }
+
+    //Checks if the form is valid
+    private boolean signUpValidator(String sfu_id, String password, String confPassword, String first_name, String last_name, String phone_number) {
+        //Check for empty fields
+        if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()) {
+            missingFields.show();
+            return false;
+        }
+        //Verify that the passwords match
+        else if (!password.equals(confPassword)) {
+            passwordMatch.show();
+            return false;
+        }
+        //Verify if the password complexity meets requirements
+        else if (!passwordChecker(password)) {
+            passwordComplexity.show();
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     //Function posts data to backend
     private void signUp(String sfu_id, String password, String first_name, String last_name, String phone_number) {
         //Prepare JSON file for sign up request
@@ -161,7 +189,7 @@ public class RegisterActivity extends AppCompatActivity {
                     finish();
                 } else {
                     Log.d("Response", String.valueOf(response.code()));
-                    message.show();
+                    accountExists.show();
                 }
             }
         });

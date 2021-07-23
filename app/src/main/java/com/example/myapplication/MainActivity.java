@@ -123,8 +123,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This function handles the post request when the post button is clicked
+     */
     void doPostRequest(String url, String user_id, String textbook_name, String suggested_price, String description_text) {
+        //Get the file format of the image
         png = MediaType.parse(getContentResolver().getType(pickedImgUri));
+        //Convert the Uri into byte[]
         InputStream iStream = null;
         try {
             iStream = getContentResolver().openInputStream(pickedImgUri);
@@ -132,7 +137,9 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         byte[] inputData = getBytes(iStream);
+        //Create the http client
         OkHttpClient client = new OkHttpClient();
+        //Setup the form data
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("user_id", user_id)
@@ -141,11 +148,13 @@ public class MainActivity extends AppCompatActivity {
                 .addFormDataPart("description_text", description_text)
                 .addFormDataPart("file", getContentResolver().getType(pickedImgUri), RequestBody.create(png, inputData))
                 .build();
+        //Setup request to PHP script with form data
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
                 .build();
 
+        //Create client call
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -191,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                showMessage("Please accept for required permission");
+                showMessage("Please accept for required permission").show();
             }
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
@@ -239,18 +248,19 @@ public class MainActivity extends AppCompatActivity {
     private boolean checkPostValidity (String itemName, String itemDescription, String userId, String suggestedPrice){
         boolean result = false;
         if(itemName.isEmpty())
-            showMessage("All fields are required: Please enter the item name");
+            showMessage("All fields are required: Please enter the item name").show();
         else if(itemDescription.isEmpty())
-            showMessage("All fields are required: Please enter the item description");
+            showMessage("All fields are required: Please enter the item description").show();
         else if(suggestedPrice.isEmpty())
-            showMessage("All fields are required: Please add a suggested price");
+            showMessage("All fields are required: Please add a suggested price").show();
         else if(userId.isEmpty())
-            showMessage("All fields are required: Please enter your userId");
+            showMessage("All fields are required: Please enter your userId").show();
         else
             result = true;
         return result;
     }
 
+    //function used to convert the Uri into byte array
     //https://stackoverflow.com/questions/10296734/image-uri-to-bytesarray
     public byte[] getBytes(InputStream inputStream) {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
@@ -270,8 +280,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Helper function for displaying toast message
-    private void showMessage (String text){
-        Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG).show();
+    private Toast showMessage (String text){
+        return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
 
 }
