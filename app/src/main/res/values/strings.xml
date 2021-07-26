@@ -23,4 +23,6 @@
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
     <string name="phone_number">Phone Number</string>
+    <string name="click_the_to_get_started">Click the + to get started</string>
+    <string name="sign_out">Sign Out</string>
 </resources>
