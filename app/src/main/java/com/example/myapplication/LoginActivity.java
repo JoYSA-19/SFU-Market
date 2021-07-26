@@ -10,7 +10,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.se.omapi.Session;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,13 +34,16 @@ public class LoginActivity extends AppCompatActivity {
     //private String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
     //for local testing
     private String loginURL = "http://10.0.2.2:81/PHP-Backend/api/post/login.php";
+    private String sessionURL = "http://10.0.2.2:81/PHP-Backend/api/post/session.php";
 
-    private EditText userEmail, userPassword;
+    private EditText sfuId, userPassword;
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;
     private ProgressBar progressBar;
     private Boolean result = false;
-    private Toast loginFail, missingFields;
+    private Toast loginFail, missingFields, sessionMessage;
+    private String sfu_id, password;
+    private SessionManagement sessionManagement;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -46,8 +51,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        sessionManagement = new SessionManagement(LoginActivity.this);
 
-        userEmail = findViewById(R.id.inputEmail);
+        sfuId = findViewById(R.id.inputEmail);
         userPassword = findViewById(R.id.inputPassword);
         loginBtn = findViewById(R.id.loginButton);
         signUpBtn = findViewById(R.id.signUpButton);
@@ -62,17 +68,41 @@ public class LoginActivity extends AppCompatActivity {
         signUpBtn.setOnClickListener(v -> registerOnPress());
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SharedPreferences sharedPreferences;
+
+        //Check if the user is currently logged into an account
+        String loggedInID = sessionManagement.getSession();
+        String deviceID = sessionManagement.getUniqueID();
+
+        if(loggedInID != null && deviceID != null) {
+            JSONObject json = onStartJSON(loggedInID, deviceID);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    //Post JSON to server
+                    doServerRequest(sessionURL, String.valueOf(json), "session");
+                }
+            }).start();
+        } else {
+            //Do nothing
+        }
+    }
+
     //Verify login
     private void loginOnPress() {
         progressBar.setVisibility(View.VISIBLE);
         loginBtn.setVisibility(View.INVISIBLE);
-        final String email = userEmail.getText().toString();
-        final String password = userPassword.getText().toString();
-        if (email.isEmpty() || password.isEmpty()) {
+        sfu_id = sfuId.getText().toString();
+        password = userPassword.getText().toString();
+        if (sfu_id.isEmpty() || password.isEmpty()) {
             missingFields.show();
             loginBtn.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.INVISIBLE);
-        } else signIn(email,password);
+        } else signIn(sfu_id, password);
         if (!result) {
             progressBar.setVisibility(View.INVISIBLE);
             loginBtn.setVisibility(View.VISIBLE);
@@ -87,25 +117,39 @@ public class LoginActivity extends AppCompatActivity {
 
     //Prepares validation to backend
     private void signIn(String email, String password) {
+        //get UUID of current device
+        String uuid = sessionManagement.getUniqueID();
         //Prepare JSON file for login request
-        JSONObject json = createJson(email, password);
+        JSONObject json = logInJson(email, password, uuid);
 
         //Create login request
         new Thread(new Runnable() {
             @Override
             public void run() {
                 //Post JSON to server
-                doLoginRequest(loginURL, String.valueOf(json));
+                doServerRequest(loginURL, String.valueOf(json), "login");
             }
         }).start();
     }
 
     //Function prepares JSON file for validation
-    JSONObject createJson(String sfu_id, String user_password) {
+    JSONObject logInJson(String sfu_id, String user_password, String uuid) {
         JSONObject json = new JSONObject();
         try {
             json.put("sfu_id", sfu_id);
             json.put("password", user_password);
+            json.put("uuid", uuid);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+
+    JSONObject onStartJSON(String sfu_id, String uuid) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("sfu_id", sfu_id);
+            json.put("uuid", uuid);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -117,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param url Database address
      * @param json login JSON Data
      */
-    void doLoginRequest(String url, String json) {
+    void doServerRequest(String url, String json, String mode) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
@@ -133,20 +177,36 @@ public class LoginActivity extends AppCompatActivity {
             }
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if(response.isSuccessful()) {
-                    result = true;
+                if(response.code() == 200) {
                     Log.d("Response", "200");
-                    login();
+                    if(mode.equals("login")) {
+                        result = true;
+                        login();
+                    }
+                    if(mode.equals("session")) {
+                        resumeSession();
+                    }
                 } else {
                     Log.d("Response", String.valueOf(response.code()));
-                    loginFail.show();
+                    if(mode.equals("login")) {
+                        loginFail.show();
+                    }
                 }
             }
         });
     }
 
-    //Clears tasks and loads mainActivity
+    //Save session, clears tasks and loads mainActivity
     private void login() {
+        sessionManagement.saveSession(sfu_id);
+
+        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+        mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(mainActivity);
+    }
+
+    //Resumes session, clears tasks and loads mainActivity
+    private void resumeSession() {
         Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
         mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(mainActivity);
@@ -156,4 +216,5 @@ public class LoginActivity extends AppCompatActivity {
     private Toast showMessage(String text) {
         return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
+
 }

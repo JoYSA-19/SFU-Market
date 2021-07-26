@@ -8,12 +8,14 @@ import androidx.core.content.FileProvider;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.BufferedSink;
 
 import android.Manifest;
 import android.content.Intent;
@@ -33,6 +35,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,9 +54,11 @@ public class MainActivity extends AppCompatActivity {
 
     //for server testing
     //private String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
+    //private String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
     //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
     //for local testing
     private String postURL = "http://10.0.2.2:81/PHP-Backend/api/post/create.php";
+    private String logOutURL = "http://10.0.2.2:81/PHP-Backend/api/post/logout.php";
     //private String feedURL = "http://10.0.2.2:81/PHP-Backend/api/post/feed.php";
 
     private String currentPhotoPath;
@@ -61,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_CODE = 2;
     private static final int REQUEST_CODE = 3;
 
-    public MediaType png;
+    private Button signOutButton;
+    private MediaType png;
     private EditText nameText, descriptionText, idText, priceText;
     private ImageView imageView;
 
@@ -70,8 +77,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        signOutButton = findViewById(R.id.signOutButton);
         findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
+
+        signOutButton.setOnClickListener(v -> signOut());
     }
+
+    private void signOut() {
+        //Remove sfu_id from SharedPreferences
+        SessionManagement sessionManagement = new SessionManagement(MainActivity.this);
+        sessionManagement.endSession();
+
+        //Sign out in backend
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Call server
+                doLogOutRequest(logOutURL, sessionManagement.getUniqueID());
+            }
+        }).start();
+
+        //Take back to login page
+        Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+        loginActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loginActivity);
+    }
+
     /**
      *  Shows the dialog and allows the user to enter information:
      *  item name, item description, photo and contact information
@@ -170,6 +201,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    void doLogOutRequest(String url, String uuid) {
+        RequestBody body = new FormBody.Builder()
+                .add("uuid", uuid)
+                .build();
+        //Create the http client
+        OkHttpClient client = new OkHttpClient();
+        //Call database to sign out
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        //Create client call
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if(response.isSuccessful()) {
+                    String mMessage = response.body().string();
+                    Log.e("Signed Out", String.valueOf(response.code()));
+                }
+                else {
+                    Log.e("Log Out Failed", String.valueOf(response.code()));
+                }
+            }
+        });
+    }
+
     /**
      * This function will take the user to the camera and take a photo of their item.
      * With permission given.

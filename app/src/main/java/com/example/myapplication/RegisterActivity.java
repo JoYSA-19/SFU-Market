@@ -183,7 +183,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.isSuccessful()) {
                     result = true;
-                    Log.d("Response", "200");
+                    Log.d("Response", String.valueOf(response.code()));
                     Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(loginActivity);
                     finish();
