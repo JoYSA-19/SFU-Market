@@ -112,7 +112,13 @@ public class SettingsActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    setText();
+                    runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            setText();
+                        }
+                    });
                 } else {
                     Log.d("Response", String.valueOf(response.code()));
 
