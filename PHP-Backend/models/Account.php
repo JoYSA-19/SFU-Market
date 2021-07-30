@@ -1,4 +1,5 @@
 <?php
+
     class Account {
 
         //Database stuff
@@ -11,7 +12,6 @@
         private $phone_number;
         private $sfu_id;
         private $password;
-        private $id;
 
         //Constructor with database
         public function __construct($db) {
@@ -81,5 +81,22 @@
             echo "Error: " . $stmt->error;
 
             return false;
+        }
+
+        public function get($sfu_id) {
+            //Set sfu_id
+            $this->sfu_id = $sfu_id;
+
+            $query = 'SELECT * FROM ' . $this->table . '
+                WHERE
+                    sfu_id = :sfu_id';
+
+            $stmt = $this->conn->prepare($query);
+
+            $stmt->bindParam(':sfu_id', $this->sfu_id);
+
+            $stmt->execute();
+
+            return $stmt;
         }
     }

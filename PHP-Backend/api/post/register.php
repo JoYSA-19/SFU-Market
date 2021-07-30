@@ -13,7 +13,6 @@
     $db = $database->connect();
 
     //Instantiate post object
-    $verify = new Account($db);
     $account = new Account($db);
 
     //Get raw posted data

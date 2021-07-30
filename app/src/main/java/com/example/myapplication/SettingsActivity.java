@@ -102,8 +102,16 @@ public class SettingsActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 if(response.code() == 200) {
                     Log.d("Response", "200");
-                    Log.d("Inside Response", Objects.requireNonNull(response.body()).string());
-                    parseJSON(Objects.requireNonNull(response.body()).string());
+                    JSONObject result = null;
+                    try {
+                        result = new JSONObject(response.body().string());
+                        firstName = result.getString("first_name");
+                        lastName = result.getString("last_name");
+                        sfuId = result.getString("sfu_id");
+                        phoneNumber = result.getString("phone_number");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     setText();
                 } else {
                     Log.d("Response", String.valueOf(response.code()));

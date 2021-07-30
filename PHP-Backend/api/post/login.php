@@ -19,24 +19,14 @@
 
     //Assign variables to class object
     $account->sfu_id = $data->sfu_id;
+    $account->password = $data->password;
+    $account->uuid = $data->uuid;
 
     //Call method to execute MySQL query
     $result = $account->login();
-
-    //Get data from result
-    $row = $result->fetch(PDO::FETCH_ASSOC);
-
-    $databaseValue = $row['password'];
-
-    //If something went wrong, return 404
-    if($row = false) {
-        echo http_response_code(404);
-    }
-    //If the correct password is with an existing SFU ID, return 200 OK
-    else if(password_verify($data->password, $databaseValue)) {
-        echo http_response_code(200);
-    }
-    //Otherwise return code 403 no matching password with SFU ID
-    else {
-        echo http_response_code(403);
+    //Return code 403 if no matching password with SFU ID
+    if ($result === false) {
+        http_response_code(403);
+    } else {
+        http_response_code(200);
     }

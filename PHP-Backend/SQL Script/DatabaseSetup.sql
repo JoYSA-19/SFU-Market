@@ -52,13 +52,9 @@ CREATE TABLE professor_item_table (
     FOREIGN KEY (item_id) REFERENCES items(id)
 );
 
-INSERT INTO users (last_name, first_name, sfu_id, phone_number, password)
-VALUES
-	('Mah', 'Lucas', 'lma95', '6046572307', '1234'),
-    ('Kim', 'Brendon', 'brendonk', '7788874338', 'asdf'),
-    ('Haraga', 'Amanda', 'aharaga', '7782305146', 'abcd'),
-    ('Yang', 'Jonathan', 'sya171', '7785226666', 'hello'),
-    ('Pinto', 'Trevor', 'tpa31', '6043602801', 'wasd');
-
-INSERT INTO posts (user_id, textbook_name, suggested_price, photo_filepath, description_text)
-VALUES ('1', 'testbook', '13.37', '../../photos/gasps.png', 'is it working?');
+CREATE TABLE session_log (
+	uuid VARCHAR(255) NOT NULL,
+	sfu_id VARCHAR(255) NOT NULL,
+    logged_in BOOLEAN,
+    PRIMARY KEY (uuid)
+);

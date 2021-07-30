@@ -50,6 +50,8 @@
                 //Prepare statement
                 $session_stmt = $this->conn->prepare($session);
 
+                $value = 1;
+
                 //Bind parameters
                 $session_stmt->bindParam(':uuid', $this->uuid);
                 $session_stmt->bindParam(':sfu_id', $this->sfu_id);

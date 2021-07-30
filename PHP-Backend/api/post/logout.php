@@ -1,32 +1,25 @@
 <?php
     header('Access-Control-Allow-Origin: *');
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Methods: POST');
-    header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
     include_once '../../config/LoginDatabase.php';
-    include_once '../../models/Signin.php';
+    include_once '../../models/Signout.php';
 
     //Instantiate database & connect
     $database = new LoginDatabase();
     $db = $database->connect();
 
     //Instantiate post object
-    $account = new Signin($db);
-
-    //Get raw posted data
-    $data = json_decode(file_get_contents("php://input"));
+    $account = new Signout($db);
 
     //Assign variables to class object
-    $account->sfu_id = $data->sfu_id;
-    $account->password = $data->password;
-    $account->uuid = $data->uuid;
+    $account->sfu_id = $_POST['sfu_id'];
+    $account->uuid = $_POST['uuid'];
 
     //Call method to execute MySQL query
-    $result = $account->login();
-    //Return code 403 if no matching password with SFU ID
+    $result = $account->logout();
+    //Return code 404 if log out failed
     if ($result === false) {
-        http_response_code(403);
+        http_response_code(404);
     } else {
         http_response_code(200);
     }
