@@ -32,16 +32,17 @@ public class LoginActivity extends AppCompatActivity {
 
     //for server testing
     //private String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
+    //private String sessionURL = "http://35.183.197.126/PHP-Backend/api/post/session.php";
     //for local testing
-    private String loginURL = "http://10.0.2.2:81/PHP-Backend/api/post/login.php";
-    private String sessionURL = "http://10.0.2.2:81/PHP-Backend/api/post/session.php";
+    private String loginURL = "http://10.0.2.2:80/PHP-Backend/api/post/login.php";
+    private String sessionURL = "http://10.0.2.2:80/PHP-Backend/api/post/session.php";
 
     private EditText sfuId, userPassword;
     //TODO "remember me" feature
     private Button loginBtn, signUpBtn;
     private ProgressBar progressBar;
     private Boolean result = false;
-    private Toast loginFail, missingFields, sessionMessage;
+    private Toast loginFail, missingFields;
     private String sfu_id, password;
     private SessionManagement sessionManagement;
 

@@ -33,7 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
     //for server testing
     // String registerURL = "http://35.183.197.126/PHP-Backend/api/post/register.php";
     //for local testing
-    private String registerURL = "http://10.0.2.2:81/PHP-Backend/api/post/register.php";
+    private String registerURL = "http://10.0.2.2:80/PHP-Backend/api/post/register.php";
 
     private EditText userId, userPassword, confirmPassword, firstName, lastName, phoneNumber;
     private Button signUpBtn;

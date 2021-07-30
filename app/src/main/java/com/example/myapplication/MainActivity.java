@@ -57,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
     //private String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
     //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
     //for local testing
-    private String postURL = "http://10.0.2.2:81/PHP-Backend/api/post/create.php";
-    private String logOutURL = "http://10.0.2.2:81/PHP-Backend/api/post/logout.php";
-    //private String feedURL = "http://10.0.2.2:81/PHP-Backend/api/post/feed.php";
+    private String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
+    private String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
+    //private String feedURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
 
     private String currentPhotoPath;
     private Uri pickedImgUri;
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_CODE = 2;
     private static final int REQUEST_CODE = 3;
 
-    private Button signOutButton;
+    private Button signOutButton, settingsButton;
     private MediaType png;
     private EditText nameText, descriptionText, idText, priceText;
     private ImageView imageView;
@@ -78,9 +78,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         signOutButton = findViewById(R.id.signOutButton);
+        settingsButton = findViewById(R.id.settingsButton);
         findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
 
         signOutButton.setOnClickListener(v -> signOut());
+        settingsButton.setOnClickListener(v -> settings());
+    }
+
+    private void settings() {
+        Intent settingsActivity = new Intent(getApplicationContext(), SettingsActivity.class);
+        startActivity(settingsActivity);
     }
 
     private void signOut() {

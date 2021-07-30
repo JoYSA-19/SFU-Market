@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import java.util.UUID;
 
+//Loosely followed this youtube tutorial
+//https://www.youtube.com/watch?v=BXejFpaEwRc
 public class SessionManagement {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
