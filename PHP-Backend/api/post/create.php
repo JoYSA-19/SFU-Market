@@ -5,14 +5,15 @@
     header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
     include_once '../../config/Database.php';
+    include_once '../../models/SessionCheck.php';
+    include_once '../../models/Account.php';
     include_once '../../models/Post.php';
 
     //Instantiate database & connect
     $database = new Database();
     $db = $database->connect();
 
-    //Instantiate post object
-    $post = new Post($db);
+
 
     //Assign file properties
     if(!isset($_FILES)) {
@@ -25,7 +26,6 @@
     $fileTmpName = $_FILES['file']['tmp_name'];
     $fileSize = $_FILES['file']['size'];
     $fileError = $_FILES['file']['error'];
-    $fileType = $_FILES['file']['type'];
 
     //Get file format
     $file_path = explode('.', $fileName);
@@ -49,16 +49,54 @@
         echo http_response_code(403);
     }
 
-    //Set post properties
-    $post->user_id = $_POST['user_id'];
-    $post->textbook_name = $_POST['textbook_name'];
-    $post->suggested_price = $_POST['suggested_price'];
-    $post->photo_filepath = $file_dest;
-    $post->description_text = $_POST['description_text'];
+    //Check for authorization
+    $verify = new SessionCheck($db);
 
-    //Create post
-    if (!$post->create()) {
+    //Get raw posted data
+    $data = json_decode(file_get_contents("php://input"));
+
+    //Assign variables to class object
+    $verify->sfu_id = $_POST['sfu_id'];
+    $verify->uuid = $_POST['uuid'];
+
+    //Call method to execute MySQL query
+    $result = $verify->sessionCheck();
+
+    //Do not retrieve info if device is not authorized, otherwise process query to get info
+    if ($result != 1) {
         echo http_response_code(404);
+        return;
     } else {
-        echo http_response_code(200);
+        //Instantiate post object
+        $post = new Post($db);
+
+        $settings = new Account($db);
+
+        $info = $settings->get($_POST['sfu_id']);
+
+        if($info == false) {
+            echo http_response_code(403);
+        } else {
+            $num = $info->rowCount();
+
+            if($num == 1) {
+                $row = $info->fetch(PDO::FETCH_ASSOC);
+
+                extract($row);
+            }
+        }
+
+        //Set post properties
+        $post->user_id = $id;
+        $post->textbook_name = $_POST['textbook_name'];
+        $post->suggested_price = $_POST['suggested_price'];
+        $post->photo_filepath = $file_dest;
+        $post->description_text = $_POST['description_text'];
+
+        //Create post
+        if (!$post->create()) {
+            echo http_response_code(404);
+        } else {
+            echo http_response_code(200);
+        }
     }

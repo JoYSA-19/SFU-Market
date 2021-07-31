@@ -5,10 +5,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.se.omapi.Session;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
@@ -16,9 +20,11 @@ import org.w3c.dom.Text;
 import java.io.IOException;
 import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,14 +35,16 @@ public class SettingsActivity extends AppCompatActivity {
 
     //for server testing
     //private String settingsURL = "http://35.183.197.126/PHP-Backend/api/post/settings.php";
+    //private String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
     //for local testing
     private String settingsURL = "http://10.0.2.2:80/PHP-Backend/api/post/settings.php";
+    private String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
 
     private TextView show_first_name, show_last_name, show_user_id, show_phone_number;
     private String firstName, lastName, sfuId, phoneNumber;
     private SessionManagement sessionManagement;
 
-    private Button backButton;
+    private Button signOutButton;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -46,14 +54,36 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         sessionManagement = new SessionManagement(SettingsActivity.this);
 
-        backButton = findViewById(R.id.backButton);
+        signOutButton = findViewById(R.id.signOutButton);
 
         show_first_name = findViewById(R.id.show_first_name);
         show_last_name = findViewById(R.id.show_last_name);
         show_user_id = findViewById(R.id.show_user_id);
         show_phone_number = findViewById(R.id.show_phone_number);
 
-        backButton.setOnClickListener(v -> back());
+        signOutButton.setOnClickListener(v -> signOut());
+
+        //Initialize and assign variable
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        //Set feed selected
+        bottomNavigationView.setSelectedItemId(R.id.settings);
+
+        //Perform ItemSelectedListener
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.feed:
+                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        overridePendingTransition(0,0);
+                        return true;
+                    case R.id.settings:
+                        return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -76,6 +106,60 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }).start();
         }
+    }
+
+    private void signOut() {
+        //Remove sfu_id from SharedPreferences
+        SessionManagement sessionManagement = new SessionManagement(SettingsActivity.this);
+        sessionManagement.endSession();
+
+        //Sign out in backend
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Call server
+                doLogOutRequest(logOutURL, sessionManagement.getUniqueID());
+            }
+        }).start();
+
+        //Take back to login page
+        Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+        loginActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(loginActivity);
+    }
+
+    void doLogOutRequest(String url, String uuid) {
+        RequestBody body = new FormBody.Builder()
+                .add("uuid", uuid)
+                .build();
+        //Create the http client
+        OkHttpClient client = new OkHttpClient();
+        //Call database to sign out
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        //Create client call
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                //call.cancel();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if(response.isSuccessful()) {
+                    String mMessage = response.body().string();
+                    Log.e("Signed Out", String.valueOf(response.code()));
+                }
+                else {
+                    Log.e("Log Out Failed", String.valueOf(response.code()));
+                }
+            }
+        });
     }
 
     private void back() {

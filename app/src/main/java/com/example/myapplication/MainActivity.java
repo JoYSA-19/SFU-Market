@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -19,6 +20,7 @@ import okio.BufferedSink;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,12 +30,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,18 +63,17 @@ public class MainActivity extends AppCompatActivity {
     //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
     //for local testing
     private String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
-    private String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
     //private String feedURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
 
+    private SessionManagement sessionManagement;
     private String currentPhotoPath;
     private Uri pickedImgUri;
     private static final int UPLOAD_CODE = 1;
     private static final int CAMERA_CODE = 2;
     private static final int REQUEST_CODE = 3;
 
-    private Button signOutButton, settingsButton;
     private MediaType png;
-    private EditText nameText, descriptionText, idText, priceText;
+    private EditText nameText, descriptionText, priceText;
     private ImageView imageView;
 
     @Override
@@ -77,37 +81,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        signOutButton = findViewById(R.id.signOutButton);
-        settingsButton = findViewById(R.id.settingsButton);
+        sessionManagement = new SessionManagement(MainActivity.this);
         findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
 
-        signOutButton.setOnClickListener(v -> signOut());
-        settingsButton.setOnClickListener(v -> settings());
-    }
+        //Initialize and assign variable
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-    private void settings() {
-        Intent settingsActivity = new Intent(getApplicationContext(), SettingsActivity.class);
-        startActivity(settingsActivity);
-    }
+        //Set feed selected
+        bottomNavigationView.setSelectedItemId(R.id.feed);
 
-    private void signOut() {
-        //Remove sfu_id from SharedPreferences
-        SessionManagement sessionManagement = new SessionManagement(MainActivity.this);
-        sessionManagement.endSession();
-
-        //Sign out in backend
-        new Thread(new Runnable() {
+        //Perform ItemSelectedListener
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void run() {
-                //Call server
-                doLogOutRequest(logOutURL, sessionManagement.getUniqueID());
+            public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.settings:
+                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                        overridePendingTransition(0,0);
+                        return true;
+                    case R.id.feed:
+                        return true;
+                }
+                return false;
             }
-        }).start();
-
-        //Take back to login page
-        Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
-        loginActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(loginActivity);
+        });
     }
 
     /**
@@ -128,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         nameText = view.findViewById(R.id.inputName);
         descriptionText = view.findViewById(R.id.inputDescription);
         priceText = view.findViewById(R.id.inputPrice);
-        idText = view.findViewById(R.id.userId);
 
         postBtn.setOnClickListener(v -> makePost(builder));
         cameraBtn.setOnClickListener(view1 -> takePhoto());
@@ -142,17 +138,16 @@ public class MainActivity extends AppCompatActivity {
         //Get values from text field variables
         String textbook_name = nameText.getText().toString();
         String description_text = descriptionText.getText().toString();
-        String user_id = idText.getText().toString();
         String suggested_price = priceText.getText().toString();
 
         //Check if all the fields have been filled in
-        if(checkPostValidity(textbook_name, description_text, user_id, suggested_price)) {
+        if(checkPostValidity(textbook_name, description_text, suggested_price)) {
             //Start a new thread to execute HTTP request
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     //Post data to server
-                    doPostRequest(postURL, user_id, textbook_name, suggested_price, description_text);
+                    doPostRequest(postURL, textbook_name, suggested_price, description_text);
                 }
             }).start();
 
@@ -164,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This function handles the post request when the post button is clicked
      */
-    void doPostRequest(String url, String user_id, String textbook_name, String suggested_price, String description_text) {
+    void doPostRequest(String url, String textbook_name, String suggested_price, String description_text) {
         //Get the file format of the image
         png = MediaType.parse(getContentResolver().getType(pickedImgUri));
         //Convert the Uri into byte[]
@@ -175,12 +170,18 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         byte[] inputData = getBytes(iStream);
+
+        //Get uuid and sfu_id
+        String sfu_id = sessionManagement.getSession();
+        String uuid = sessionManagement.getUniqueID();
+
         //Create the http client
         OkHttpClient client = new OkHttpClient();
         //Setup the form data
         RequestBody body = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("user_id", user_id)
+                .addFormDataPart("sfu_id", sfu_id)
+                .addFormDataPart("uuid", uuid)
                 .addFormDataPart("textbook_name", textbook_name)
                 .addFormDataPart("suggested_price", suggested_price)
                 .addFormDataPart("description_text", description_text)
@@ -205,40 +206,6 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 String mMessage = response.body().string();
                 Log.e("success", mMessage);
-            }
-        });
-    }
-
-    void doLogOutRequest(String url, String uuid) {
-        RequestBody body = new FormBody.Builder()
-                .add("uuid", uuid)
-                .build();
-        //Create the http client
-        OkHttpClient client = new OkHttpClient();
-        //Call database to sign out
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-
-        //Create client call
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                String mMessage = e.getMessage();
-                Log.w("failure Response", mMessage);
-                //call.cancel();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if(response.isSuccessful()) {
-                    String mMessage = response.body().string();
-                    Log.e("Signed Out", String.valueOf(response.code()));
-                }
-                else {
-                    Log.e("Log Out Failed", String.valueOf(response.code()));
-                }
             }
         });
     }
@@ -314,11 +281,10 @@ public class MainActivity extends AppCompatActivity {
      * Check if the input values are empty.
      * @param itemName item name
      * @param itemDescription item description
-     * @param userId contact information
      * @param suggestedPrice item price
      * @return true if all filled; false if at least one is empty
      */
-    private boolean checkPostValidity (String itemName, String itemDescription, String userId, String suggestedPrice){
+    private boolean checkPostValidity (String itemName, String itemDescription, String suggestedPrice){
         boolean result = false;
         if(itemName.isEmpty())
             showMessage("All fields are required: Please enter the item name").show();
@@ -326,8 +292,6 @@ public class MainActivity extends AppCompatActivity {
             showMessage("All fields are required: Please enter the item description").show();
         else if(suggestedPrice.isEmpty())
             showMessage("All fields are required: Please add a suggested price").show();
-        else if(userId.isEmpty())
-            showMessage("All fields are required: Please enter your userId").show();
         else
             result = true;
         return result;

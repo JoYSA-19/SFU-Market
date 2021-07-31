@@ -77,16 +77,6 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/uploaded_picture" />
 
-            <EditText
-                android:id="@+id/userId"
-                android:layout_width="300dp"
-                android:layout_height="92dp"
-                android:ems="10"
-                android:gravity="start|top"
-                android:hint="User ID"
-                android:inputType="textMultiLine"
-                android:autofillHints="phone number"/>
-
             <Button
                 style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/btnPost"
