@@ -42,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginBtn, signUpBtn;
     private ProgressBar progressBar;
     private Boolean result = false;
-    private Toast loginFail, missingFields;
+    private Toast loginFail, missingFields, verificationText;
     private String sfu_id, password;
     private SessionManagement sessionManagement;
 
@@ -63,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //Predefine toast messages
         loginFail = showMessage("Incorrect SFU ID or password");
+        verificationText = showMessage("An Email has been sent to your SFU ID for Account Validation");
         missingFields = showMessage("Please enter your SFU ID or password");
 
         loginBtn.setOnClickListener(v -> loginOnPress());
@@ -186,6 +187,11 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     if(mode.equals("session")) {
                         resumeSession();
+                    }
+                } else if(response.code() == 401) {
+                    Log.d("Response", "401");
+                    if(mode.equals("login")) {
+                        verificationText.show();
                     }
                 } else {
                     Log.d("Response", String.valueOf(response.code()));

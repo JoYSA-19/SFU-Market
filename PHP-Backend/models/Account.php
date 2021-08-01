@@ -1,5 +1,10 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require '../../vendor/autoload.php';
+
     class Account {
 
         //Database stuff
@@ -12,6 +17,7 @@
         private $phone_number;
         private $sfu_id;
         private $password;
+        private $token;
 
         //Constructor with database
         public function __construct($db) {
@@ -44,6 +50,7 @@
                 return false;
             }
 
+
             //Create query to add new user
             $query = 'INSERT INTO ' . $this->table . '
                         SET
@@ -51,7 +58,8 @@
                             last_name = :last_name,
                             phone_number = :phone_number,
                             sfu_id = :sfu_id,
-                            password = :password';
+                            password = :password,
+                            token = :token';
 
             $stmt = $this->conn->prepare($query);
 
@@ -64,23 +72,63 @@
 
             //hash password
             $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-
+          
+            //Create token for email verification
+            function createToken($len=32){
+                return substr(md5(openssl_random_pseudo_bytes(20)), -$len);
+            }
+            $token = createToken(10);
+            $this->token = $token;
+            
+            $this->verificationMail($this->sfu_id, $this->token);
+            
             //Bind data
             $stmt->bindParam(':first_name', $this->first_name);
             $stmt->bindParam(':last_name', $this->last_name);
             $stmt->bindParam(':phone_number', $this->phone_number);
             $stmt->bindParam(':sfu_id', $this->sfu_id);
             $stmt->bindParam(':password', $this->password);
+            $stmt->bindParam(':token', $this->token);
 
             //Execute query
             if($stmt->execute()) {
                 return true;
             }
 
-            //Print errer if something goes wrong
+            //Print error if something goes wrong
             echo "Error: " . $stmt->error;
 
             return false;
+        }
+        
+        public function verificationMail($sfu_id, $token) {
+
+            $mail = new PHPMailer(true);
+
+            try {
+                $mail->SMTPDebug = 2;
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'sfumarket9@gmail.com';
+                $mail->Password = 'sfumarket2021';
+                $mail->SMTPSecure = 'ssl';
+                $mail->Port = 465;
+
+                $mail->setFrom('sfumarket9@gmail.com', 'Activate your Account');
+                $mail->addAddress($this->sfu_id);
+                $mail->addReplyTo($this->sfu_id);
+
+
+                $mail->isHTML(true);
+                $mail->Subject = 'Confirm Email';
+                $mail->Body = 'Click here to activate your account:
+                <a href="https://localhost/PHP-Backend/api/post/verify.php?sfu_id=' . $sfu_id . '&token=' . $token . '">Confirm Email</a>';
+                $mail->send();
+                echo 'Message sent!';
+            } catch (Exception $e) {
+                echo "Message could not be sent", $mail->ErrorInfo;
+            }
         }
 
         public function get($sfu_id) {

@@ -31,4 +31,5 @@
     <string name="show_user_id">User ID:</string>
     <string name="show_phone_number">Phone Number:</string>
     <string name="logout">LogOut</string>
+    <string name="sfu_email">SFU Email</string>
 </resources>
