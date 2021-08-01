@@ -25,7 +25,9 @@
     //Call method to execute MySQL query
     $result = $account->login();
     //Return code 403 if no matching password with SFU ID
-    if ($result === false) {
+    if ($result == 401) {
+        http_response_code(401);
+    } else if ($result == 403) {
         http_response_code(403);
     } else {
         http_response_code(200);
