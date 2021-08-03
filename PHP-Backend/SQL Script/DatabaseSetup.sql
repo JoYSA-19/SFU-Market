@@ -7,6 +7,8 @@ CREATE TABLE users (
     sfu_id VARCHAR(255) NOT NULL,
     phone_number BIGINT NOT NULL,
     password TINYTEXT NOT NULL,
+    token VARCHAR(20) NOT NULL,
+    confirmation INT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id)
 );
 
