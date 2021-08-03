@@ -240,33 +240,35 @@ public class MainActivity extends AppCompatActivity {
     private void updatePostInfo(int position) {
         //Bitmap bitmap = BitmapFactory.decodeFile(postList.get(position).getPhoto_filepath());
         //des_image.setImageBitmap(bitmap);
-        if(position == postList.size()){
-            position = 0;
-            currentPosition = position;
-            //showMessage("Current position: 0").show();
-        }
-
-        if(position < 0){
-            position = postList.size()-1;
-            currentPosition = position;
-            //showMessage("Current position: " + Integer.toString(currentPosition)).show();
-        }
-        int finalPosition = position;
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                Post item = postList.get(finalPosition);
-                des_title.setText(item.getTextbook_name());
-                des_contact.setText("Name: " + item.getFirst_name() + " " + item.getLast_name() + "\n"
-                                    + "SFU ID: " + item.getSfu_id() + "\n"
-                                    + "Phone Number: " + item.getPhone_number());
-                String priceTag = "$ " + String.format(java.util.Locale.US,"%.2f",item.getSuggested_price());
-                des_image.setImageBitmap(item.getPhoto());
-                des_price.setText(priceTag);
-                des_des.setText(item.getDescription_text());
+        if (postList.size() > 0) {
+            if (position == postList.size()) {
+                position = 0;
+                currentPosition = position;
+                //showMessage("Current position: 0").show();
             }
-        });
+
+            if (position < 0) {
+                position = postList.size() - 1;
+                currentPosition = position;
+                //showMessage("Current position: " + Integer.toString(currentPosition)).show();
+            }
+            int finalPosition = position;
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    Post item = postList.get(finalPosition);
+                    des_title.setText(item.getTextbook_name());
+                    des_contact.setText("Name: " + item.getFirst_name() + " " + item.getLast_name() + "\n"
+                            + "SFU ID: " + item.getSfu_id() + "\n"
+                            + "Phone Number: " + item.getPhone_number());
+                    String priceTag = "$ " + String.format(java.util.Locale.US, "%.2f", item.getSuggested_price());
+                    des_image.setImageBitmap(item.getPhoto());
+                    des_price.setText(priceTag);
+                    des_des.setText(item.getDescription_text());
+                }
+            });
+        }
     }
 
 
