@@ -61,7 +61,9 @@
         //Get from database
         public function read() {
             //Create query
-            $query = 'SELECT * FROM ' . $this->table;
+            $query = 'SELECT posts.*, users.first_name, users.last_name, users.sfu_id, users.phone_number FROM ' . $this->table . '
+                        LEFT JOIN users
+                        ON posts.user_id = users.id';
 
             //Prepare statement
             $stmt = $this->conn->prepare($query);
