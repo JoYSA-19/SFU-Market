@@ -31,11 +31,11 @@ import java.io.IOException;
 public class LoginActivity extends AppCompatActivity {
 
     //for server testing
-    //private String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
-    //private String sessionURL = "http://35.183.197.126/PHP-Backend/api/post/session.php";
+    //private final String loginURL = "http://35.183.197.126/PHP-Backend/api/post/login.php";
+    //private final String sessionURL = "http://35.183.197.126/PHP-Backend/api/post/session.php";
     //for local testing
-    private String loginURL = "http://10.0.2.2:80/PHP-Backend/api/post/login.php";
-    private String sessionURL = "http://10.0.2.2:80/PHP-Backend/api/post/session.php";
+    private final String loginURL = "http://10.0.2.2:80/PHP-Backend/api/post/login.php";
+    private final String sessionURL = "http://10.0.2.2:80/PHP-Backend/api/post/session.php";
 
     private EditText sfuId, userPassword;
     //TODO "remember me" feature
