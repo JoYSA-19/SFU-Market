@@ -18,7 +18,7 @@
 
         public function login() {
             //Create Query
-            $query = 'SELECT password
+            $query = 'SELECT password, confirmation
                     FROM
                         ' . $this->table . '
                     WHERE
@@ -36,33 +36,37 @@
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             $databaseValue = $result['password'];
+            $confirmation = $result['confirmation'];
 
-            if(password_verify($this->password, $databaseValue)) {
-                $session = 'INSERT INTO ' . $this->session_table . '
-                            SET
-                                uuid = :uuid,
-                                sfu_id = :sfu_id,
-                                logged_in = :logged_in
-                            ON DUPLICATE KEY UPDATE
-                                sfu_id = :sfu_id,
-                                logged_in = :logged_in';
+            if ($confirmation == 1) {
+                if(password_verify($this->password, $databaseValue)) {
+                    $session = 'INSERT INTO ' . $this->session_table . '
+                                SET
+                                    uuid = :uuid,
+                                    sfu_id = :sfu_id,
+                                    logged_in = :logged_in
+                                ON DUPLICATE KEY UPDATE
+                                    sfu_id = :sfu_id,
+                                    logged_in = :logged_in';
 
-                //Prepare statement
-                $session_stmt = $this->conn->prepare($session);
+                    //Prepare statement
+                    $session_stmt = $this->conn->prepare($session);
 
-                $value = 1;
+                    $value = 1;
 
-                //Bind parameters
-                $session_stmt->bindParam(':uuid', $this->uuid);
-                $session_stmt->bindParam(':sfu_id', $this->sfu_id);
-                $session_stmt->bindParam(':logged_in', $value);
+                    //Bind parameters
+                    $session_stmt->bindParam(':uuid', $this->uuid);
+                    $session_stmt->bindParam(':sfu_id', $this->sfu_id);
+                    $session_stmt->bindParam(':logged_in', $value);
 
-                //Execute session query
-                $session_stmt->execute();
-
-                return $session_stmt;
+                    //Execute session query
+                    $session_stmt->execute();
+                    return $session_stmt;
+                } else {
+                    return 403;
+                }
             } else {
-                return false;
+                return 401;
             }
         }
     }
