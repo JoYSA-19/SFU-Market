@@ -63,7 +63,8 @@
             //Create query
             $query = 'SELECT posts.*, users.first_name, users.last_name, users.sfu_id, users.phone_number FROM ' . $this->table . '
                         LEFT JOIN users
-                        ON posts.user_id = users.id';
+                        ON posts.user_id = users.id
+                        ORDER BY posts.post_date DESC';
 
             //Prepare statement
             $stmt = $this->conn->prepare($query);
