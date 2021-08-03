@@ -36,12 +36,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,6 +53,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * The home page including post button, which will open up a dialog for posting instantly
@@ -58,12 +64,13 @@ import java.net.URI;
 public class MainActivity extends AppCompatActivity {
 
     //for server testing
-    //private String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
-    //private String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
-    //private String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
+    //private final String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
+    //private final String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
+    //private final String imageURL = "http://35.183.197.126/PHP-Backend/api/post/image.php";
     //for local testing
-    private String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
-    //private String feedURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
+    private final String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
+    private final String readURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
+    private final String imageURL = "http://10.0.2.2:80/PHP-Backend/api/post/image.php";
 
     private SessionManagement sessionManagement;
     private String currentPhotoPath;
@@ -76,6 +83,11 @@ public class MainActivity extends AppCompatActivity {
     private EditText nameText, descriptionText, priceText;
     private ImageView imageView;
 
+    private ImageView des_image,des_profile;
+    private TextView des_title, des_contact, des_price, des_des;
+    private int currentPosition;
+    List<Post> postList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +95,30 @@ public class MainActivity extends AppCompatActivity {
 
         sessionManagement = new SessionManagement(MainActivity.this);
         findViewById(R.id.btnMakePost).setOnClickListener(view -> handlePostDialog());
+
+        des_image = findViewById(R.id.des_image);
+        des_image.setOnClickListener(v -> {
+            //TODO: Click on the image, call show_image_dialogue
+        });
+        des_profile = findViewById(R.id.des_profile);
+        des_title = findViewById(R.id.des_title);
+        des_contact = findViewById(R.id.des_contact);
+        des_price = findViewById(R.id.des_price);
+        des_des = findViewById(R.id.des_des);
+        currentPosition = 0;
+        findViewById(R.id.btnPreviousPost).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updatePostInfo(--currentPosition);
+            }
+        });
+        findViewById(R.id.btnNextPost).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updatePostInfo(++currentPosition);
+            }
+        });
+        getPostInfo();
 
         //Initialize and assign variable
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -147,7 +183,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     //Post data to server
-                    doPostRequest(postURL, textbook_name, suggested_price, description_text);
+                    try {
+                        doPostRequest(postURL, textbook_name, suggested_price, description_text);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }).start();
 
@@ -156,10 +196,84 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getPostInfo() {
+        new Thread(() -> {
+            OkHttpClient client = new OkHttpClient();
+            Request request = new Request.Builder()
+                    .url(readURL)
+                    .build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                    String mMessage = e.getMessage();
+                    Log.w("Failure Feed Response", mMessage);
+                    //call.cancel();
+                }
+
+                @Override
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    String myResponse;
+                    postList = new ArrayList<>();
+                    try {
+                        myResponse = Objects.requireNonNull(response.body()).string();
+                        JSONArray postArray = new JSONArray(myResponse);
+                        for(int i = 0; i < postArray.length(); i++){
+                            JSONObject newPost = postArray.getJSONObject(i);
+                            Post post = new Post(newPost.getInt("id"),newPost.getString("sfu_id"),
+                                    newPost.getString("textbook_name"),newPost.getDouble("suggested_price"),
+                                    null,newPost.getString("description_text"),
+                                    newPost.getString("post_date"), newPost.getString("first_name"), newPost.getString("last_name"),
+                                    newPost.getString("phone_number"));
+                            postList.add(post);
+                            getImageRequest(imageURL, newPost.getString("photo_filepath"), i);
+                        }
+                        updatePostInfo(0);
+                    } catch (JSONException | InterruptedException e){
+                        String mMessage = e.getMessage();
+                        Log.w("JSON Failure", mMessage);
+                    }
+                }
+            });
+        }).start();
+    }
+
+    private void updatePostInfo(int position) {
+        //Bitmap bitmap = BitmapFactory.decodeFile(postList.get(position).getPhoto_filepath());
+        //des_image.setImageBitmap(bitmap);
+        if(position == postList.size()){
+            position = 0;
+            currentPosition = position;
+            //showMessage("Current position: 0").show();
+        }
+
+        if(position < 0){
+            position = postList.size()-1;
+            currentPosition = position;
+            //showMessage("Current position: " + Integer.toString(currentPosition)).show();
+        }
+        int finalPosition = position;
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                Post item = postList.get(finalPosition);
+                des_title.setText(item.getTextbook_name());
+                des_contact.setText("Name: " + item.getFirst_name() + " " + item.getLast_name() + "\n"
+                                    + "SFU ID: " + item.getSfu_id() + "\n"
+                                    + "Phone Number: " + item.getPhone_number());
+                String priceTag = "$ " + String.format(java.util.Locale.US,"%.2f",item.getSuggested_price());
+                des_image.setImageBitmap(item.getPhoto());
+                des_price.setText(priceTag);
+                des_des.setText(item.getDescription_text());
+            }
+        });
+    }
+
+
     /**
      * This function handles the post request when the post button is clicked
      */
-    void doPostRequest(String url, String textbook_name, String suggested_price, String description_text) {
+    void doPostRequest(String url, String textbook_name, String suggested_price, String description_text) throws InterruptedException {
         //Get the file format of the image
         png = MediaType.parse(getContentResolver().getType(pickedImgUri));
         //Convert the Uri into byte[]
@@ -169,6 +283,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        assert iStream != null;
         byte[] inputData = getBytes(iStream);
 
         //Get uuid and sfu_id
@@ -193,21 +308,60 @@ public class MainActivity extends AppCompatActivity {
                 .post(body)
                 .build();
 
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         //Create client call
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 String mMessage = e.getMessage();
                 Log.w("failure Response", mMessage);
-                //call.cancel();
+                countDownLatch.countDown();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String mMessage = response.body().string();
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String mMessage = Objects.requireNonNull(response.body()).string();
                 Log.e("success", mMessage);
+                countDownLatch.countDown();
             }
         });
+        countDownLatch.await();
+    }
+
+    void getImageRequest(String url, String filepath, int index) throws InterruptedException {
+        //Create the http client
+        OkHttpClient client = new OkHttpClient();
+        //Setup the form data
+        RequestBody body = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("filepath", filepath)
+                .build();
+        //Setup request to PHP script with form data
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        //Create client call
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                String mMessage = e.getMessage();
+                Log.w("failure Response", mMessage);
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                if(response.isSuccessful()) {
+                    postList.get(index).setPhoto(BitmapFactory.decodeStream(Objects.requireNonNull(response.body()).byteStream()));
+                    Objects.requireNonNull(response.body()).close();
+                    countDownLatch.countDown();
+                }
+            }
+        });
+        countDownLatch.await();
     }
 
     /**
@@ -307,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
         int len = 0;
         while (true) {
             try {
-                if (!((len = inputStream.read(buffer)) != -1)) break;
+                if ((len = inputStream.read(buffer)) == -1) break;
             } catch (IOException e) {
                 e.printStackTrace();
             }

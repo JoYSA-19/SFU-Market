@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -34,17 +35,15 @@ import okhttp3.Response;
 public class SettingsActivity extends AppCompatActivity {
 
     //for server testing
-    //private String settingsURL = "http://35.183.197.126/PHP-Backend/api/post/settings.php";
-    //private String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
+    //private final String settingsURL = "http://35.183.197.126/PHP-Backend/api/post/settings.php";
+    //private final String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
     //for local testing
-    private String settingsURL = "http://10.0.2.2:80/PHP-Backend/api/post/settings.php";
-    private String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
+    private final String settingsURL = "http://10.0.2.2:80/PHP-Backend/api/post/settings.php";
+    private final String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
 
     private TextView show_first_name, show_last_name, show_user_id, show_phone_number;
     private String firstName, lastName, sfuId, phoneNumber;
     private SessionManagement sessionManagement;
-
-    private Button signOutButton;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -54,7 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         sessionManagement = new SessionManagement(SettingsActivity.this);
 
-        signOutButton = findViewById(R.id.signOutButton);
+        Button signOutButton = findViewById(R.id.signOutButton);
 
         show_first_name = findViewById(R.id.show_first_name);
         show_last_name = findViewById(R.id.show_last_name);
@@ -71,6 +70,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         //Perform ItemSelectedListener
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull @NotNull MenuItem item) {
                 switch (item.getItemId()) {
@@ -143,16 +143,16 @@ public class SettingsActivity extends AppCompatActivity {
         //Create client call
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 String mMessage = e.getMessage();
                 Log.w("failure Response", mMessage);
                 //call.cancel();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if(response.isSuccessful()) {
-                    String mMessage = response.body().string();
+                    String mMessage = Objects.requireNonNull(response.body()).string();
                     Log.e("Signed Out", String.valueOf(response.code()));
                 }
                 else {
@@ -160,12 +160,6 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void back() {
-        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
-        mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(mainActivity);
     }
 
     private void doSettingsRequest(String url, String json) {
@@ -177,18 +171,18 @@ public class SettingsActivity extends AppCompatActivity {
                 .build();
         client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 String mMessage = e.getMessage();
                 Log.w("Failure Response", mMessage);
                 //call.cancel();
             }
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if(response.code() == 200) {
                     Log.d("Response", "200");
                     JSONObject result = null;
                     try {
-                        result = new JSONObject(response.body().string());
+                        result = new JSONObject(Objects.requireNonNull(response.body()).string());
                         firstName = result.getString("first_name");
                         lastName = result.getString("last_name");
                         sfuId = result.getString("sfu_id");
@@ -220,18 +214,6 @@ public class SettingsActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return json;
-    }
-
-    private void parseJSON(String json) {
-        try {
-            JSONObject result = new JSONObject(json);
-            firstName = result.getString("first_name");
-            lastName = result.getString("last_name");
-            sfuId = result.getString("sfu_id");
-            phoneNumber = result.getString("phone_number");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setText() {

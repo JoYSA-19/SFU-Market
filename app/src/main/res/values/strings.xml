@@ -31,4 +31,11 @@
     <string name="show_user_id">User ID:</string>
     <string name="show_phone_number">Phone Number:</string>
     <string name="logout">LogOut</string>
+    <string name="next_post">Next Post</string>
+    <string name="previous_post">Previous Post</string>
+    <string name="previous">Previous</string>
+    <string name="last_post">last post</string>
+    <string name="title">Title</string>
+    <string name="profile_image">Profile Image</string>
+    <string name="image_preview">Image Preview</string>
 </resources>
