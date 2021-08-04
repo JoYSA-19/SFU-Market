@@ -64,13 +64,13 @@ import java.util.concurrent.CountDownLatch;
 public class MainActivity extends AppCompatActivity {
 
     //for server testing
-    //private final String postURL = "http://35.183.197.126/PHP-Backend/api/post/create.php";
-    //private final String feedURL = "http://35.183.197.126/PHP-Backend/api/post/feed.php";
-    //private final String imageURL = "http://35.183.197.126/PHP-Backend/api/post/image.php";
+    private final String postURL = "http://35.183.69.80/PHP-Backend/api/post/create.php";
+    private final String readURL = "http://35.183.69.80/PHP-Backend/api/post/feed.php";
+    private final String imageURL = "http://35.183.69.80/PHP-Backend/api/post/image.php";
     //for local testing
-    private final String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
-    private final String readURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
-    private final String imageURL = "http://10.0.2.2:80/PHP-Backend/api/post/image.php";
+    //private final String postURL = "http://10.0.2.2:80/PHP-Backend/api/post/create.php";
+    //private final String readURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
+    //private final String imageURL = "http://10.0.2.2:80/PHP-Backend/api/post/image.php";
 
     private SessionManagement sessionManagement;
     private String currentPhotoPath;

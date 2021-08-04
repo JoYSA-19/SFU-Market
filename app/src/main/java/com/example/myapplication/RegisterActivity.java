@@ -31,9 +31,9 @@ import java.io.IOException;
 public class RegisterActivity extends AppCompatActivity {
 
     //for server testing
-    //private final String registerURL = "http://35.183.197.126/PHP-Backend/api/post/register.php";
+    private final String registerURL = "http://35.183.69.80/PHP-Backend/api/post/register.php";
     //for local testing
-    private final String registerURL = "http://10.0.2.2:80/PHP-Backend/api/post/register.php";
+    //private final String registerURL = "http://10.0.2.2:80/PHP-Backend/api/post/register.php";
 
     private EditText userId, userPassword, confirmPassword, firstName, lastName, phoneNumber;
     private Button signUpBtn;

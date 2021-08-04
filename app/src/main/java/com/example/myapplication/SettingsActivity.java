@@ -35,11 +35,11 @@ import okhttp3.Response;
 public class SettingsActivity extends AppCompatActivity {
 
     //for server testing
-    //private final String settingsURL = "http://35.183.197.126/PHP-Backend/api/post/settings.php";
-    //private final String logOutURL = "http://35.183.197.126/PHP-Backend/api/post/logout.php";
+    private final String settingsURL = "http://35.183.69.80/PHP-Backend/api/post/settings.php";
+    private final String logOutURL = "http://35.183.69.80/PHP-Backend/api/post/logout.php";
     //for local testing
-    private final String settingsURL = "http://10.0.2.2:80/PHP-Backend/api/post/settings.php";
-    private final String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
+    //private final String settingsURL = "http://10.0.2.2:80/PHP-Backend/api/post/settings.php";
+    //private final String logOutURL = "http://10.0.2.2:80/PHP-Backend/api/post/logout.php";
 
     private TextView show_first_name, show_last_name, show_user_id, show_phone_number;
     private String firstName, lastName, sfuId, phoneNumber;

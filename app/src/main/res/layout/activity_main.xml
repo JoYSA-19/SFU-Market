@@ -35,7 +35,7 @@
             <ImageView
                 android:id="@+id/des_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="300sp"
                 android:contentDescription="@string/image_preview"
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/ic_launcher_background" />
