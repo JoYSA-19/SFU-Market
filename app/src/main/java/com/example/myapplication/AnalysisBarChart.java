@@ -29,6 +29,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * In the Setting Activity, click "Data Analysis" to show a Histogram of Cost distribution
+ */
 public class AnalysisBarChart extends MainActivity {
 
     @Override
@@ -37,6 +40,11 @@ public class AnalysisBarChart extends MainActivity {
         setContentView(R.layout.activity_analysis_bar_chart);
         barChartGenerator();
     }
+
+    /**
+     * Get Maximum price value in the Postlist
+     * @return Maximum price value in the Postlist
+     */
     private double getMax() {
         double result = -1;
         for (int i = 0; i < postList.size(); i++) {
@@ -46,6 +54,10 @@ public class AnalysisBarChart extends MainActivity {
         return result;
     }
 
+    /**
+     * Get Minimum price value in the Postlist
+     * @return Minimum price value in the Postlist
+     */
     private double getMin() {
         double result = Double.MAX_VALUE;
         for (int i = 0; i < postList.size(); i++) {
@@ -58,10 +70,10 @@ public class AnalysisBarChart extends MainActivity {
     /**
      * Return Class interval of the histogram, the returned list should have numClass + 1 elements
      *
-     * @param max
-     * @param min
-     * @param numClass
-     * @return
+     * @param max maximum value of price
+     * @param min minimum value of price
+     * @param numClass number of classes for the histogram
+     * @return class interval (Ex. 0, 100, 200, 300, 400) The last value will be the maximum value
      */
     private double[] getClassInterval(double max, double min, int numClass) {
         double[] result = new double[numClass + 1];
@@ -72,6 +84,11 @@ public class AnalysisBarChart extends MainActivity {
         return result;
     }
 
+    /**
+     * Assign the ArrayList for the BarChartGenerator
+     * @param interval double array of class interval
+     * @return the ArrayList for the BarChartGenerator
+     */
     private ArrayList<BarEntry> assignClassInterval(double[] interval) {
         ArrayList<BarEntry> frequency = new ArrayList<>();
         double inter = (interval[1] - interval[0]);
@@ -89,6 +106,9 @@ public class AnalysisBarChart extends MainActivity {
         return frequency;
     }
 
+    /**
+     * Generate the BarChart, in our case, a histogram of cost distribution
+     */
     private void barChartGenerator() {
         BarChart barChart = findViewById(R.id.barChart);
         //populate the bar chart with the post information

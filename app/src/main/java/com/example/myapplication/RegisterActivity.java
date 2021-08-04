@@ -77,7 +77,9 @@ public class RegisterActivity extends AppCompatActivity {
         loginTxt.setOnClickListener(view -> loginOnPress());
     }
 
-    //Verify Sign up
+    /**
+     * Verify Sign up
+     */
     private void signupOnPress() {
         //Start loading bar on sign up button
         signUpBtn.setVisibility(View.INVISIBLE);
@@ -105,13 +107,24 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    //Switches to loginActivity
+    /**
+     * Switches to loginActivity
+     */
     private void loginOnPress() {
         Intent loginIntent = new Intent(getApplicationContext(),LoginActivity.class);
         startActivity(loginIntent);
     }
 
-    //Checks if the form is valid
+    /**
+     * Checks if the form is valid
+     * @param sfu_id sfu id: Ex. lsh14
+     * @param password password
+     * @param confPassword confirm password
+     * @param first_name first name of the user
+     * @param last_name last name of the user
+     * @param phone_number phone number of the user
+     * @return true if entries are valid
+     */
     private boolean signUpValidator(String sfu_id, String password, String confPassword, String first_name, String last_name, String phone_number) {
         //Check for empty fields
         if (sfu_id.isEmpty() || password.isEmpty() || confPassword.isEmpty() || first_name.isEmpty() || last_name.isEmpty() || phone_number.isEmpty()) {
@@ -133,7 +146,14 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    //Function posts data to backend
+    /**
+     * Function posts data to backend
+     * @param sfu_id sfu
+     * @param password password
+     * @param first_name first name of the user
+     * @param last_name last name of the user
+     * @param phone_number phone number of the user
+     */
     private void signUp(String sfu_id, String password, String first_name, String last_name, String phone_number) {
         //Prepare JSON file for sign up request
         JSONObject json = createJson(sfu_id, password, first_name, last_name, phone_number);
@@ -194,8 +214,13 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
     }
-    //Minimum password complexity; checks if requirements for password is met
-    //Source: https://ssaurel.medium.com/develop-a-password-strength-calculator-application-for-android-de3711ba7959
+
+    /**
+     * Minimum password complexity; checks if requirements for password is met
+     * Source: https://ssaurel.medium.com/develop-a-password-strength-calculator-application-for-android-de3711ba7959
+     * @param password password checking
+     * @return password validator
+     */
     private boolean passwordChecker(String password) {
         if (password.length() <= 8) {
             return false; //password length is too short
@@ -229,7 +254,12 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         }
     }
-    //Helper function for displaying toast message
+
+    /**
+     * Helper function for displaying toast message
+     * @param text message
+     * @return Toast message, need to use with .show()
+     */
     private Toast showMessage (String text) {
         return Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
     }

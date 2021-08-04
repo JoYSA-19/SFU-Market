@@ -48,6 +48,10 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+    /**
+     * Declare each View element
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +74,10 @@ public class LoginActivity extends AppCompatActivity {
         signUpBtn.setOnClickListener(v -> registerOnPress());
     }
 
+    /**
+     * Login to the app. If previously logged in, the app will take the
+     * user to the homepage directly.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -94,7 +102,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    //Verify login
+
+    /**
+     * Verify login
+     */
     private void loginOnPress() {
         progressBar.setVisibility(View.VISIBLE);
         loginBtn.setVisibility(View.INVISIBLE);
@@ -111,13 +122,19 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    //Switch to registerActivity
+    /**
+     * Switch to registerActivity
+     */
     private void registerOnPress() {
         Intent registerActivity = new Intent(getApplicationContext(),RegisterActivity.class);
         startActivity(registerActivity);
     }
 
-    //Prepares validation to backend
+    /**
+     * Prepares validation to backend
+     * @param email user email
+     * @param password password, hashed in the server
+     */
     private void signIn(String email, String password) {
         //get UUID of current device
         String uuid = sessionManagement.getUniqueID();
@@ -134,7 +151,14 @@ public class LoginActivity extends AppCompatActivity {
         }).start();
     }
 
-    //Function prepares JSON file for validation
+
+    /**
+     * Function prepares JSON file for validation
+     * @param sfu_id sfu_id : (Ex. lsh14)
+     * @param user_password password
+     * @param uuid Cell phone id, for Remember Me function
+     * @return LoginJSon
+     */
     JSONObject logInJson(String sfu_id, String user_password, String uuid) {
         JSONObject json = new JSONObject();
         try {
@@ -147,6 +171,12 @@ public class LoginActivity extends AppCompatActivity {
         return json;
     }
 
+    /**
+     * Generate the JSON
+     * @param sfu_id sfu_id : (Ex. lsh14)
+     * @param uuid Cell phone id, for Remember Me function
+     * @return OnStartJSon
+     */
     JSONObject onStartJSON(String sfu_id, String uuid) {
         JSONObject json = new JSONObject();
         try {
@@ -203,7 +233,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    //Save session, clears tasks and loads mainActivity
+    /**
+     * Save session, clears tasks and loads mainActivity
+     */
     private void login() {
         sessionManagement.saveSession(sfu_id);
 
@@ -212,14 +244,20 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(mainActivity);
     }
 
-    //Resumes session, clears tasks and loads mainActivity
+    /**
+     * Resumes session, clears tasks and loads mainActivity
+     */
     private void resumeSession() {
         Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
         mainActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(mainActivity);
     }
 
-    //Helper function for displaying toast message
+    /**
+     * Helper function for displaying toast message
+     * @param text message
+     * @return Toast message, use with .show()
+     */
     private Toast showMessage(String text) {
         return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }

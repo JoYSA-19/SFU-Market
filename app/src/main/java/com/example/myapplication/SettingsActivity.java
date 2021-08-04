@@ -32,6 +32,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * Setting page
+ */
 public class SettingsActivity extends AppCompatActivity {
 
     //for server testing
@@ -113,6 +116,9 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sign out the user
+     */
     private void signOut() {
         //Remove sfu_id from SharedPreferences
         SessionManagement sessionManagement = new SessionManagement(SettingsActivity.this);
@@ -133,6 +139,11 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(loginActivity);
     }
 
+    /**
+     * Send the log out request
+     * @param url php url
+     * @param uuid cell phone id
+     */
     void doLogOutRequest(String url, String uuid) {
         RequestBody body = new FormBody.Builder()
                 .add("uuid", uuid)
@@ -167,6 +178,11 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Send setting request
+     * @param url php url
+     * @param json json message
+     */
     private void doSettingsRequest(String url, String json) {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, json);
@@ -210,6 +226,12 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Generate the json
+     * @param sfu_id sfu id
+     * @param uuid cell phone
+     * @return json for remember me feature
+     */
     private JSONObject getInfoJSON(String sfu_id, String uuid) {
         JSONObject json = new JSONObject();
         try {
@@ -221,6 +243,9 @@ public class SettingsActivity extends AppCompatActivity {
         return json;
     }
 
+    /**
+     * Assign values for textViews
+     */
     private void setText() {
         show_first_name.setText("First Name: " + firstName);
         show_last_name.setText("Last Name: " + lastName);

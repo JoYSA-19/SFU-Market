@@ -89,7 +89,11 @@ public class MainActivity extends AppCompatActivity {
     static public List<Post> postList;
 
 
-
+    /**
+     * Declare and assign variables for each View element
+     * Show the post info in the homepage
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -198,6 +202,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieve the post information and store in a postList
+     */
     private void getPostInfo() {
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient();
@@ -239,6 +246,10 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Update the postInfo once the "next" or "previous" button are clicked
+     * @param position current post position
+     */
     private void updatePostInfo(int position) {
         //Bitmap bitmap = BitmapFactory.decodeFile(postList.get(position).getPhoto_filepath());
         //des_image.setImageBitmap(bitmap);
@@ -332,6 +343,13 @@ public class MainActivity extends AppCompatActivity {
         countDownLatch.await();
     }
 
+    /**
+     * Send image request
+     * @param url php url
+     * @param filepath image filepath
+     * @param index index
+     * @throws InterruptedException
+     */
     void getImageRequest(String url, String filepath, int index) throws InterruptedException {
         //Create the http client
         OkHttpClient client = new OkHttpClient();
@@ -474,7 +492,11 @@ public class MainActivity extends AppCompatActivity {
         return byteBuffer.toByteArray();
     }
 
-    //Helper function for displaying toast message
+    /**
+     * Helper function for displaying toast message
+     * @param text message
+     * @return Toast message, need to use with .show()
+     */
     private Toast showMessage (String text){
         return Toast.makeText(getApplicationContext(),text,Toast.LENGTH_LONG);
     }
