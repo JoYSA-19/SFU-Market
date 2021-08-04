@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -29,79 +30,80 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AnalysisBarChart extends MainActivity {
-    private final int numClass = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_analysis_bar_chart);
         barChartGenerator();
-
     }
-    private double getMax(){
+    private double getMax() {
         double result = -1;
-        for(int i = 0; i < postList.size(); i++){
-            if(postList.get(i).getSuggested_price() > result)
+        for (int i = 0; i < postList.size(); i++) {
+            if (postList.get(i).getSuggested_price() > result)
                 result = postList.get(i).getSuggested_price();
         }
         return result;
     }
-    private double getMin(){
+
+    private double getMin() {
         double result = Double.MAX_VALUE;
-        for(int i = 0; i < postList.size(); i++){
-            if(postList.get(i).getSuggested_price() < result)
+        for (int i = 0; i < postList.size(); i++) {
+            if (postList.get(i).getSuggested_price() < result)
                 result = postList.get(i).getSuggested_price();
         }
         return result;
     }
+
     /**
      * Return Class interval of the histogram, the returned list should have numClass + 1 elements
+     *
      * @param max
      * @param min
      * @param numClass
      * @return
      */
-    private double[] getClassInterval(double max, double min, int numClass){
+    private double[] getClassInterval(double max, double min, int numClass) {
         double[] result = new double[numClass + 1];
-        double interval = (max-min) / 4;
-        for(int i = 0; i <= numClass; i++){
-            result[i] = min+interval*i;
-            //System.out.println(result[i] + " interval");
+        double interval = (max - min) / 4;
+        for (int i = 0; i <= numClass; i++) {
+            result[i] = min + interval * i;
         }
         return result;
     }
-    private ArrayList<BarEntry> assignClassInterval(double[] interval){
+
+    private ArrayList<BarEntry> assignClassInterval(double[] interval) {
         ArrayList<BarEntry> frequency = new ArrayList<>();
         double inter = (interval[1] - interval[0]);
-        for(int i = 1; i < interval.length; i++){
-            frequency.add(new BarEntry((float)(inter/2 + interval[0] + inter*(i-1)), 0));
+        for (int i = 1; i < interval.length; i++) {
+            frequency.add(new BarEntry((float) (inter / 2 + interval[0] + inter * (i - 1)), 0));
         }
-        for(Post i:postList){
-            for(int j = 1; j < interval.length; j++){
-                if(i.getSuggested_price() <= interval[j]){
-                    frequency.get(j-1).setY(frequency.get(j-1).getY()+1);
+        for (Post i : postList) {
+            for (int j = 1; j < interval.length; j++) {
+                if (i.getSuggested_price() <= interval[j]) {
+                    frequency.get(j - 1).setY(frequency.get(j - 1).getY() + 1);
                     break;
                 }
             }
         }
-        /*
-        for(int i = 0; i < frequency.size();i++){
-            System.out.println("frequency arrayList: " + i + "position: " + frequency.get(i).getX());
-        }
-         */
         return frequency;
     }
-    private void barChartGenerator()
-    {
-        //Bar Chart Generator
+
+    private void barChartGenerator() {
         BarChart barChart = findViewById(R.id.barChart);
-        //populate the bar chart with the user input
-        BarDataSet barDataSet = new BarDataSet(assignClassInterval(getClassInterval(getMax(), getMin(), numClass)), "Price");
+        //populate the bar chart with the post information
+        int numClass = 4;
+        BarDataSet barDataSet = new BarDataSet(assignClassInterval(getClassInterval(getMax(), getMin(), numClass)), "Frequency");
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         barDataSet.setValueTextColor(Color.BLACK);
         barDataSet.setValueTextSize(16f);
 
         BarData barData = new BarData(barDataSet);
-        barData.setBarWidth(100f);
+        barData.setBarWidth(30f);
+        Description description = new Description();
+        description.setTextSize(16f);
+        description.setText("Frequency vs Cost Graph");
+        barChart.setDescription(description);
         barChart.setFitBars(true);
         barChart.setData(barData);
         barChart.animateY(2000);
