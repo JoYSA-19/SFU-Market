@@ -29,19 +29,12 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AnalysisBarChart extends MainActivity {
-    private final String readURL = "http://10.0.2.2:80/PHP-Backend/api/post/feed.php";
     private final int numClass = 4;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_analysis_bar_chart);
-        //Getting input for bar chart
-        System.out.println(postList.size() + " here");
-        System.out.println(postList.get(0).getSuggested_price() + "here");
-        //System.out.println(numberOfBooksThree + "After function");
         barChartGenerator();
-
-
 
     }
     private double getMax(){
@@ -72,7 +65,7 @@ public class AnalysisBarChart extends MainActivity {
         double interval = (max-min) / 4;
         for(int i = 0; i <= numClass; i++){
             result[i] = min+interval*i;
-            System.out.println(result[i] + " interval");
+            //System.out.println(result[i] + " interval");
         }
         return result;
     }
@@ -90,15 +83,18 @@ public class AnalysisBarChart extends MainActivity {
                 }
             }
         }
+        /*
         for(int i = 0; i < frequency.size();i++){
             System.out.println("frequency arrayList: " + i + "position: " + frequency.get(i).getX());
         }
+         */
         return frequency;
     }
     private void barChartGenerator()
     {
         //Bar Chart Generator
         BarChart barChart = findViewById(R.id.barChart);
+        //populate the bar chart with the user input
         BarDataSet barDataSet = new BarDataSet(assignClassInterval(getClassInterval(getMax(), getMin(), numClass)), "Price");
         barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
         barDataSet.setValueTextColor(Color.BLACK);
