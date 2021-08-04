@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/user_account_management_logo_user_icon_11562867145a56rus2zwu"
+        app:srcCompat="@drawable/ic_bag"
         android:contentDescription="@string/user_icon" />
 
     <EditText
@@ -40,7 +40,7 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
+<!--
     <Switch
         android:id="@+id/rememberMeSwitch"
         android:layout_width="265dp"
@@ -51,7 +51,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline3"
         tools:ignore="UseSwitchCompatOrMaterialXml" />
-
+-->
     <Button
         android:id="@+id/loginButton"
         style="@style/Widget.AppCompat.Button.Colored"

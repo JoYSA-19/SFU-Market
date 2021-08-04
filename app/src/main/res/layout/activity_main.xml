@@ -58,7 +58,7 @@
                 <TextView
                     android:id="@+id/des_title"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:background="@drawable/info_field_border"
                     android:gravity="bottom"
