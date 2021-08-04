@@ -3,6 +3,17 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+/*
+ * The PHPMailer library is downloaded from the following location:
+ *     https://github.com/PHPMailer/PHPMailer
+ * The source code has not been modified.
+ * The file has the following copyright from the original author:
+ * Copyright (C) 1991, 1999 Free Software Foundation, Inc.
+ * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Everyone is permitted to copy and distribute verbatim copies
+ * of this license document, but changing it is not allowed.
+ */
+
 require '../../vendor/autoload.php';
 
     class Account {
