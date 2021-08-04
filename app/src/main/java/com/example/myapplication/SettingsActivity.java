@@ -54,7 +54,12 @@ public class SettingsActivity extends AppCompatActivity {
         sessionManagement = new SessionManagement(SettingsActivity.this);
 
         Button signOutButton = findViewById(R.id.signOutButton);
-
+        findViewById(R.id.buttonBarChart).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), AnalysisBarChart.class));
+            }
+        });
         show_first_name = findViewById(R.id.show_first_name);
         show_last_name = findViewById(R.id.show_last_name);
         show_user_id = findViewById(R.id.show_user_id);

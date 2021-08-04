@@ -86,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView des_image,des_profile;
     private TextView des_title, des_contact, des_price, des_des;
     private int currentPosition;
-    List<Post> postList;
+    static public List<Post> postList;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
