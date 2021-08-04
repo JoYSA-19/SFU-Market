@@ -2,7 +2,7 @@ SFU Market
 
 Preface
 ------------------------------------
-For this Iteration, we have successfully shifted to PHP and MySQL as our backend. The relational database will be helpful for adding features later on. For example, tying textbooks to professors would be easier if multiple teachers have the same textbook and vice versa. Additionally, we are using AWS for hosting our web server so this time, there should not be a need to download any backend code and should simply run with just the frontend code. The current running backend code is available to be viewed under the PHP-Backend folder.
+For this final sprint, we have added sessions which allows all activites while logged in be under that user. Users are also able to view and click through all posts that have been posted to our app. While we weren't able to implement all features that we had planned, our app is able to do what we originally planned for it to do.
 
 Introduction
 ------------------------------------
